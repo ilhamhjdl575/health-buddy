@@ -1,4 +1,13 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-const links = [{ href: "/buddy", label: "หน้าหลัก" }, { href: "/buddy/open-jobs", label: "งานที่เปิดรับ" }, { href: "/buddy/my-jobs", label: "งานของฉัน" }, { href: "/buddy/today", label: "งานวันนี้" }, { href: "/buddy/availability", label: "เวลาพร้อมรับงาน" }, { href: "/buddy/history", label: "ประวัติงาน" }];
-export default function BuddyLayout({ children }: { children: ReactNode }) { return <div className="min-h-screen bg-blue-50"><header className="border-b border-blue-100 bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6"><Link className="text-xl font-bold text-blue-800" href="/buddy">Health Buddy · สำหรับ อสม.</Link><Link className="rounded-xl border border-blue-300 bg-blue-50 px-3.5 py-2 text-sm font-bold text-blue-900 hover:bg-blue-100" href="/login">สลับบทบาท</Link></div></header><nav aria-label="เมนู อสม." className="border-b border-blue-100 bg-white"><div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 py-3 sm:px-6">{links.map((link) => <Link className="shrink-0 rounded-lg px-3 py-2 font-semibold hover:bg-blue-100" href={link.href} key={link.href}>{link.label}</Link>)}</div></nav><main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main></div>; }
+import { BuddyNav } from "@/app/_components/buddy-nav";
+
+export default function BuddyLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-screen bg-blue-50/50 flex flex-col">
+      <BuddyNav />
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+        {children}
+      </main>
+    </div>
+  );
+}
