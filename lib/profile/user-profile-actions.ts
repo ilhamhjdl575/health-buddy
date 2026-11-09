@@ -19,6 +19,7 @@ export interface UserProfileData {
   patientGender?: string;
   patientBirthYear?: string;
   address: string;
+  hasCar: boolean;
   // Emergency contact
   emergencyName: string;
   emergencyRelation: string;
@@ -92,13 +93,22 @@ export async function getUserProfileData(): Promise<GetUserProfileResult> {
       address: string;
     } | null;
 
-    const { data: pContacts } = await supabase
-      .from("patient_emergency_contacts")
-      .select("name, relationship, phone")
-      .eq("patient_id", links[0].patient_id)
-      .order("is_primary", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [{ data: pContacts }, { data: pMob }] = await Promise.all([
+      supabase
+        .from("patient_emergency_contacts")
+        .select("name, relationship, phone")
+        .eq("patient_id", links[0].patient_id)
+        .order("is_primary", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("patient_mobility_profiles")
+        .select("note")
+        .eq("patient_id", links[0].patient_id)
+        .maybeSingle(),
+    ]);
+
+    const hasCar = pMob?.note?.includes("รถยนต์: มีรถยนต์ส่วนตัว") ?? false;
 
     return {
       success: true,
@@ -115,6 +125,7 @@ export async function getUserProfileData(): Promise<GetUserProfileResult> {
         patientGender: patientRow?.gender || "",
         patientBirthYear: toBuddhistYear(patientRow?.birth_date || null),
         address: patientRow?.address || "",
+        hasCar,
         emergencyName: pContacts?.name || "",
         emergencyRelation: pContacts?.relationship || "",
         emergencyPhone: pContacts?.phone || "",
@@ -169,6 +180,7 @@ export async function getUserProfileData(): Promise<GetUserProfileResult> {
       birthYear: toBuddhistYear(profile.birth_date),
       email: profile.email || "",
       address,
+      hasCar: mob?.note?.includes("รถยนต์: มีรถยนต์ส่วนตัว") ?? false,
       emergencyName: emergContact?.name || "",
       emergencyRelation: emergContact?.relationship || "",
       emergencyPhone: emergContact?.phone || "",
@@ -244,6 +256,31 @@ export async function saveUserProfileData(
       await supabase.from("patients").update(patientUpdate).eq("id", patientId);
     }
 
+    // Update patient mobility note if hasCar is set
+    if (formData.hasCar !== undefined) {
+      const { data: pMob } = await supabase
+        .from("patient_mobility_profiles")
+        .select("id, note")
+        .eq("patient_id", patientId)
+        .maybeSingle();
+
+      const carTag = formData.hasCar ? "รถยนต์: มีรถยนต์ส่วนตัว" : "รถยนต์: ไม่มีรถยนต์ส่วนตัว";
+      let newNote = carTag;
+      if (pMob?.note) {
+        if (pMob.note.includes("รถยนต์:")) {
+          newNote = pMob.note.replace(/รถยนต์:\s*[^|]+/, carTag);
+        } else {
+          newNote = `${pMob.note} | ${carTag}`;
+        }
+      }
+      if (pMob) {
+        await supabase
+          .from("patient_mobility_profiles")
+          .update({ note: newNote, updated_at: new Date().toISOString() })
+          .eq("id", pMob.id);
+      }
+    }
+
     // Update patient emergency contact
     if (emergencyName && emergencyPhone) {
       const { data: existingContact } = await supabase
@@ -275,8 +312,8 @@ export async function saveUserProfileData(
       }
     }
   } else {
-    // Regular self patient: Update address in mobility note
-    if (address) {
+    // Regular self patient: Update address & vehicle in mobility note
+    if (address || formData.hasCar !== undefined) {
       const { data: mob } = await supabase
         .from("mobility_profiles")
         .select("id, note")
@@ -284,12 +321,20 @@ export async function saveUserProfileData(
         .maybeSingle();
 
       if (mob) {
-        let newNote = `ที่อยู่: ${address}`;
-        if (mob.note) {
-          if (mob.note.includes("ที่อยู่:")) {
-            newNote = mob.note.replace(/ที่อยู่:\s*[^|]+/, `ที่อยู่: ${address}`);
+        let newNote = mob.note || "";
+        if (address) {
+          if (newNote.includes("ที่อยู่:")) {
+            newNote = newNote.replace(/ที่อยู่:\s*[^|]+/, `ที่อยู่: ${address}`);
           } else {
-            newNote = `${mob.note} | ที่อยู่: ${address}`;
+            newNote = newNote ? `${newNote} | ที่อยู่: ${address}` : `ที่อยู่: ${address}`;
+          }
+        }
+        if (formData.hasCar !== undefined) {
+          const carTag = formData.hasCar ? "รถยนต์: มีรถยนต์ส่วนตัว" : "รถยนต์: ไม่มีรถยนต์ส่วนตัว";
+          if (newNote.includes("รถยนต์:")) {
+            newNote = newNote.replace(/รถยนต์:\s*[^|]+/, carTag);
+          } else {
+            newNote = newNote ? `${newNote} | ${carTag}` : carTag;
           }
         }
         await supabase

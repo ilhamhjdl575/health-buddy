@@ -74,6 +74,18 @@ export function CandidateList({
                   <span className="font-semibold text-slate-500">พื้นที่ให้บริการ: </span>
                   <span className="text-slate-800">{b.serviceArea || "ในพื้นที่"}</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-500">ยานพาหนะส่วนตัว: </span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-0.5 text-sm font-bold ${
+                      b.hasCar
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-900"
+                        : "border-slate-200 bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {b.hasCar ? "🚗 มีรถยนต์ส่วนตัว" : "🚶 ไม่มีรถยนต์ส่วนตัว"}
+                  </span>
+                </div>
               </div>
 
               <div className="mt-5 pt-3 border-t border-slate-100">

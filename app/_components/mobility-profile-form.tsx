@@ -26,6 +26,7 @@ const mobilitySchema = z.object({
   needsWalkingAssistant: z.boolean(),
   avoidsStairs: z.boolean(),
   isBedridden: z.boolean(),
+  hasCar: z.boolean(),
   notes: z.string().trim().optional(),
 });
 
@@ -107,6 +108,7 @@ export function MobilityProfileForm({
       needsWalkingAssistant: initialValues?.needsWalkingAssistant ?? false,
       avoidsStairs: initialValues?.avoidsStairs ?? false,
       isBedridden: initialValues?.isBedridden ?? false,
+      hasCar: initialValues?.hasCar ?? false,
       notes: initialValues?.notes ?? "",
     },
     resolver: zodResolver(mobilitySchema),
@@ -247,6 +249,50 @@ export function MobilityProfileForm({
           })}
         </div>
       </fieldset>
+
+      {/* ข้อมูลยานพาหนะส่วนตัว */}
+      <div className="mt-8 rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-xs">
+        <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+          <span>🚗</span> ข้อมูลยานพาหนะส่วนตัว (ผู้รับบริการ)
+        </h2>
+        <p className="mt-3 text-base text-slate-600">
+          ผู้รับบริการหรือครอบครัวมีรถยนต์ส่วนตัวสำหรับพาเดินทางหรือไม่?
+        </p>
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setValue("hasCar", true, { shouldDirty: true })}
+            className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${
+              selectedValues.hasCar
+                ? "border-teal-600 bg-teal-50 ring-2 ring-teal-500 font-extrabold text-teal-950"
+                : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            <span className="text-3xl">🚗</span>
+            <div>
+              <p className="font-bold text-lg">มีรถยนต์ส่วนตัว</p>
+              <p className="text-xs text-slate-500">สามารถใช้รถของผู้รับบริการในการเดินทางไปพบแพทย์ได้</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setValue("hasCar", false, { shouldDirty: true })}
+            className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${
+              !selectedValues.hasCar
+                ? "border-teal-600 bg-teal-50 ring-2 ring-teal-500 font-extrabold text-teal-950"
+                : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            <span className="text-3xl">🚶</span>
+            <div>
+              <p className="font-bold text-lg">ไม่มีรถยนต์ส่วนตัว</p>
+              <p className="text-xs text-slate-500">ไม่มีรถยนต์ส่วนตัว ต้องการผู้ดูแลที่มีรถหรือรถสาธารณะ</p>
+            </div>
+          </button>
+        </div>
+      </div>
 
       <div className="mt-9">
         <label className="text-2xl font-bold text-slate-950" htmlFor="mobility-notes">

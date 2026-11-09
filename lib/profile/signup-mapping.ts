@@ -14,6 +14,7 @@ export interface UserSignupFormRaw {
   birthYear: string;
   gender?: string;
   address?: string;
+  hasCar?: boolean;
   mobilityStatuses?: string[];
   emergencyName?: string;
   emergencyRelation?: string;
@@ -29,8 +30,9 @@ export interface BuddySignupFormRaw {
   phone: string;
   religion: string;
   gender: string;
+  hasCar?: boolean;
   buddyTypes: ("VILLAGE_HEALTH_VOLUNTEER" | "CAREGIVER_420_HOURS")[];
-  workModes: ("DAILY" | "MONTHLY")[];
+  workModes: ("DAILY" | "MONTHLY" | "HAS_CAR")[];
 }
 
 /**
@@ -80,6 +82,11 @@ export function mapUserFormDataToProfileInput(form: UserSignupFormRaw): UserProf
 
   const noteParts = [
     form.address ? `ที่อยู่: ${form.address}` : null,
+    form.hasCar !== undefined
+      ? form.hasCar
+        ? "รถยนต์: มีรถยนต์ส่วนตัว"
+        : "รถยนต์: ไม่มีรถยนต์ส่วนตัว"
+      : null,
   ].filter(Boolean);
 
   const emergencyContacts =
@@ -147,6 +154,11 @@ export function mapBuddyFormDataToProfileInput(form: BuddySignupFormRaw): BuddyP
     qualificationType: buddyType,
   }));
 
+  let workModes: BuddyProfileInput["workModes"] = [...form.workModes];
+  if (form.hasCar) {
+    workModes = Array.from(new Set([...workModes, "HAS_CAR"]));
+  }
+
   return {
     role: "BUDDY",
     firstName: form.firstName.trim(),
@@ -154,7 +166,7 @@ export function mapBuddyFormDataToProfileInput(form: BuddySignupFormRaw): BuddyP
     phone: form.phone.trim() || null,
     religion: form.religion.trim(),
     gender: form.gender.trim(),
-    workModes: form.workModes,
+    workModes,
     qualifications,
   };
 }

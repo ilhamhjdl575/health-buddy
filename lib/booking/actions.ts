@@ -25,6 +25,8 @@ export type BookingListItem = {
   destinationAddress: string | null;
   status: string;
   recipientName: string;
+  recipientHasCar?: boolean;
+  needBuddyCar?: boolean;
 };
 
 const bookingSchema = z.object({
@@ -49,6 +51,7 @@ function extractMobilityBadges(mobility?: {
   uses_walker?: boolean | null;
   needs_walking_assistance?: boolean | null;
   difficulty_using_stairs?: boolean | null;
+  note?: string | null;
 } | null): string[] {
   if (!mobility) return ["ไม่ใช่ผู้ป่วยติดเตียง", "เดินได้ปกติ"];
   if (mobility.is_bedridden) {
@@ -64,6 +67,12 @@ function extractMobilityBadges(mobility?: {
 
   if (badges.length === 1) {
     badges.push("เดินได้ปกติ");
+  }
+
+  if (mobility.note?.includes("รถยนต์: มีรถยนต์ส่วนตัว")) {
+    badges.push("มีรถยนต์ส่วนตัว");
+  } else if (mobility.note?.includes("รถยนต์: ไม่มีรถยนต์ส่วนตัว")) {
+    badges.push("ไม่มีรถยนต์ส่วนตัว");
   }
 
   return badges;
@@ -99,6 +108,7 @@ export async function getBookableRecipients(): Promise<
             uses_walker: boolean;
             needs_walking_assistance: boolean;
             difficulty_using_stairs: boolean;
+            note: string | null;
           }> | null;
         };
         const mob = patient.patient_mobility_profiles?.[0];
@@ -195,7 +205,7 @@ export async function getMyBookings(): Promise<
   const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", current.profileId).single();
   const { data, error } = await supabase
     .from("service_requests")
-    .select("id, request_no, service_type, service_date, start_time, end_time, pickup_address, destination_address, status, patient_id, patients(first_name, last_name)")
+    .select("id, request_no, service_type, service_date, start_time, end_time, pickup_address, destination_address, description, status, patient_id, patients(first_name, last_name)")
     .eq("requester_profile_id", current.profileId)
     .order("created_at", { ascending: false });
   if (error) return { success: false, error: "ไม่สามารถโหลดรายการจองได้" };
@@ -203,11 +213,21 @@ export async function getMyBookings(): Promise<
     success: true,
     bookings: (data ?? []).map((row) => {
       const patient = row.patients as unknown as { first_name: string; last_name: string } | null;
+      const desc = row.description || "";
+      const recipientHasCar = desc.includes("[รถยนต์ผู้รับบริการ: มีรถยนต์ส่วนตัว]")
+        ? true
+        : desc.includes("[รถยนต์ผู้รับบริการ: ไม่มีรถยนต์ส่วนตัว]")
+        ? false
+        : undefined;
+      const needBuddyCar = desc.includes("[ต้องการผู้ดูแลที่มีรถยนต์ส่วนตัว]");
+
       return {
         id: row.id, requestNo: row.request_no, serviceType: row.service_type as ServiceType,
         serviceDate: row.service_date, startTime: row.start_time, endTime: row.end_time,
         pickupAddress: row.pickup_address, destinationAddress: row.destination_address, status: row.status,
         recipientName: patient ? `${patient.first_name} ${patient.last_name}` : `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim(),
+        recipientHasCar,
+        needBuddyCar,
       };
     }),
   };

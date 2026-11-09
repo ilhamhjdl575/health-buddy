@@ -135,7 +135,7 @@ export const buddyProfileSchema = baseProfileSchema
     serviceArea: z.string().trim().nullable().optional(),
     religion: z.string().trim().min(1, "กรุณาเลือกศาสนา"),
     gender: z.string().trim().min(1, "กรุณาเลือกเพศ"),
-    workModes: z.array(z.enum(["DAILY", "MONTHLY"])),
+    workModes: z.array(z.enum(["DAILY", "MONTHLY", "HAS_CAR"])),
     qualifications: z
       .array(buddyQualificationSchema)
       .min(1, "กรุณาเลือกประเภท Buddy อย่างน้อย 1 ประเภท"),

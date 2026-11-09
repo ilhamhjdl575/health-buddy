@@ -25,6 +25,7 @@ interface UserFormData {
   birthYear: string;
   gender: string;
   address: string;
+  hasCar: boolean;
   mobilityStatuses: string[];
   emergencyName: string;
   emergencyRelation: string;
@@ -37,6 +38,7 @@ interface BuddyFormData {
   phone: string;
   religion: string;
   gender: string;
+  hasCar: boolean;
   buddyTypes: ("VILLAGE_HEALTH_VOLUNTEER" | "CAREGIVER_420_HOURS")[];
   workModes: ("DAILY" | "MONTHLY")[];
   certificates: Partial<Record<"VILLAGE_HEALTH_VOLUNTEER" | "CAREGIVER_420_HOURS", File>>;
@@ -61,6 +63,7 @@ export function SignupView() {
     birthYear: "",
     gender: "",
     address: "",
+    hasCar: false,
     mobilityStatuses: [],
     emergencyName: "",
     emergencyRelation: "บุตร/หลาน",
@@ -73,6 +76,7 @@ export function SignupView() {
     phone: "",
     religion: "",
     gender: "",
+    hasCar: false,
     buddyTypes: [],
     workModes: [],
     certificates: {},
@@ -777,6 +781,55 @@ export function SignupView() {
                 </div>
               </fieldset>
 
+              {/* Section: Vehicle Information for User */}
+              <fieldset className={`space-y-4 border-t border-slate-100 pt-5 ${userData.applicantType ? "" : "hidden"} ${userData.applicantType === "PATIENT_CAREGIVER" ? "order-7" : "order-6"}`}>
+                <legend className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>🚗</span> ข้อมูลยานพาหนะส่วนตัว (ผู้รับบริการ)
+                </legend>
+                <p className="text-sm text-slate-600">ผู้รับบริการหรือครอบครัวมีรถยนต์ส่วนตัวสำหรับใช้เดินทางหรือไม่?</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label
+                    className={`flex items-center gap-3 rounded-2xl border-2 p-3.5 cursor-pointer transition ${
+                      userData.hasCar
+                        ? "border-teal-700 bg-teal-50/70"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="user-has-car"
+                      checked={userData.hasCar}
+                      onChange={() => setUserData({ ...userData, hasCar: true })}
+                      className="size-5 accent-teal-700"
+                    />
+                    <div>
+                      <span className="block font-bold text-slate-900">มีรถยนต์ส่วนตัว</span>
+                      <span className="text-xs text-slate-600">สามารถใช้รถของผู้รับบริการในการเดินทางได้</span>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`flex items-center gap-3 rounded-2xl border-2 p-3.5 cursor-pointer transition ${
+                      !userData.hasCar
+                        ? "border-teal-700 bg-teal-50/70"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="user-has-car"
+                      checked={!userData.hasCar}
+                      onChange={() => setUserData({ ...userData, hasCar: false })}
+                      className="size-5 accent-teal-700"
+                    />
+                    <div>
+                      <span className="block font-bold text-slate-900">ไม่มีรถยนต์ส่วนตัว</span>
+                      <span className="text-xs text-slate-600">ต้องการผู้ดูแลที่มีรถยนต์ส่วนตัว หรือใช้รถสาธารณะ</span>
+                    </div>
+                  </label>
+                </div>
+              </fieldset>
+
               {/* Emergency Contact is only required when the patient registers for themselves. */}
               {userData.applicantType === "PATIENT" && (
               <fieldset className="order-4 space-y-4 border-t border-slate-100 pt-5">
@@ -1065,6 +1118,55 @@ export function SignupView() {
                     </div>
                   );
                 })}
+              </fieldset>
+
+              {/* Section: Vehicle Information for Buddy */}
+              <fieldset className="space-y-4 border-t border-slate-100 pt-5">
+                <legend className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>🚗</span> ยานพาหนะส่วนตัว (ผู้ส่ง / ผู้ดูแล)
+                </legend>
+                <p className="text-sm text-slate-600">ท่านมีรถยนต์ส่วนตัวที่สามารถใช้รับ-ส่งผู้รับบริการได้หรือไม่?</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label
+                    className={`flex items-center gap-3 rounded-2xl border-2 p-3.5 cursor-pointer transition ${
+                      buddyData.hasCar
+                        ? "border-blue-700 bg-blue-50/70"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="buddy-has-car"
+                      checked={buddyData.hasCar}
+                      onChange={() => setBuddyData({ ...buddyData, hasCar: true })}
+                      className="size-5 accent-blue-700"
+                    />
+                    <div>
+                      <span className="block font-bold text-slate-900">มีรถยนต์ส่วนตัว</span>
+                      <span className="text-xs text-slate-600">สามารถขับรถไปรับ-ส่งผู้รับบริการได้</span>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`flex items-center gap-3 rounded-2xl border-2 p-3.5 cursor-pointer transition ${
+                      !buddyData.hasCar
+                        ? "border-blue-700 bg-blue-50/70"
+                        : "border-slate-200 bg-white hover:border-slate-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="buddy-has-car"
+                      checked={!buddyData.hasCar}
+                      onChange={() => setBuddyData({ ...buddyData, hasCar: false })}
+                      className="size-5 accent-blue-700"
+                    />
+                    <div>
+                      <span className="block font-bold text-slate-900">ไม่มีรถยนต์ส่วนตัว</span>
+                      <span className="text-xs text-slate-600">เดินทางด้วยรถของผู้รับบริการหรือรถสาธารณะ</span>
+                    </div>
+                  </label>
+                </div>
               </fieldset>
 
               {/* Submit Buttons */}

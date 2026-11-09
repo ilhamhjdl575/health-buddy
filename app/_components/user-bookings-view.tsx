@@ -69,6 +69,25 @@ export function UserBookingsView({ bookings }: { bookings: BookingListItem[] }) 
                       <span className="font-semibold text-slate-500">จุดหมาย:</span> {b.destinationAddress}
                     </p>
                   )}
+                  {b.recipientHasCar !== undefined && (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      <span className="font-semibold text-slate-500">ยานพาหนะ:</span>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold ${
+                          b.recipientHasCar
+                            ? "border border-emerald-300 bg-emerald-50 text-emerald-900"
+                            : "border border-slate-200 bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {b.recipientHasCar ? "🚗 ผู้รับบริการมีรถยนต์ส่วนตัว" : "🚶 ผู้รับบริการไม่มีรถยนต์ส่วนตัว"}
+                      </span>
+                      {b.needBuddyCar && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-900">
+                          🚙 ต้องการผู้ดูแลที่มีรถ
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {b.status === "OPEN" && (

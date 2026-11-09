@@ -22,6 +22,7 @@ export interface BuddyProfileData {
   religion: string;
   workModes: string[];
   isActive: boolean;
+  hasCar: boolean;
   qualifications: BuddyQualificationInfo[];
 }
 
@@ -97,6 +98,7 @@ export async function getBuddyProfileData(): Promise<GetBuddyProfileResult> {
       religion: buddyProfile?.religion || "",
       workModes: buddyProfile?.work_modes || ["DAILY"],
       isActive: buddyProfile?.is_active ?? true,
+      hasCar: (buddyProfile?.work_modes || []).includes("HAS_CAR"),
       qualifications: (quals || []).map((q) => ({
         qualificationType: q.qualification_type,
         status: q.status,
@@ -122,7 +124,12 @@ export async function saveBuddyProfileData(
   const birthYear = (formData.birthYear || "").trim();
   const serviceArea = (formData.serviceArea || "").trim();
   const religion = (formData.religion || "").trim();
-  const workModes = formData.workModes && formData.workModes.length > 0 ? formData.workModes : ["DAILY"];
+  let workModes = formData.workModes && formData.workModes.length > 0 ? formData.workModes : ["DAILY"];
+  if (formData.hasCar === true) {
+    workModes = Array.from(new Set([...workModes, "HAS_CAR"]));
+  } else if (formData.hasCar === false) {
+    workModes = workModes.filter((m) => m !== "HAS_CAR");
+  }
   const isActive = formData.isActive ?? true;
 
   if (!firstName || !lastName) {

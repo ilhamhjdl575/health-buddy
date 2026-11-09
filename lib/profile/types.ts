@@ -90,7 +90,7 @@ export type BuddyProfileInput = BaseProfileInput & {
   serviceArea?: string | null;
   religion: string;
   gender: string;
-  workModes: ("DAILY" | "MONTHLY")[];
+  workModes: ("DAILY" | "MONTHLY" | "HAS_CAR")[];
   qualifications?: BuddyQualificationInput[];
 };
 

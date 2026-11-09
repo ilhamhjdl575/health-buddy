@@ -106,7 +106,7 @@ export function NotificationBell({
         type="button"
         onClick={() => setOpen(!open)}
         aria-label={`การแจ้งเตือน ${unread} รายการที่ยังไม่ได้อ่าน`}
-        className="relative flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-3 font-bold text-slate-800"
+        className="relative flex min-h-10 sm:min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-2.5 sm:px-3 font-bold text-slate-800 hover:bg-slate-50 transition active:scale-[0.98] shrink-0"
       >
         <svg
           className="size-5 text-slate-700"
@@ -122,73 +122,81 @@ export function NotificationBell({
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unread > 0 && (
-          <span className="ml-1 rounded-full bg-red-600 px-2 py-0.5 text-xs text-white">
+          <span className="ml-1 rounded-full bg-red-600 px-1.5 sm:px-2 py-0.5 text-xs text-white">
             {unread}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
-          <div className="flex items-center justify-between">
-            <h2 className="font-bold">การแจ้งเตือน</h2>
-            {unread > 0 && (
-              <button
-                disabled={isPending}
-                onClick={markAll}
-                className="text-sm font-semibold text-blue-700"
-              >
-                อ่านทั้งหมด
-              </button>
-            )}
-          </div>
-          <div className="mt-2 max-h-80 space-y-2 overflow-y-auto">
-            {items.length === 0 ? (
-              <p className="p-4 text-center text-sm text-slate-500">
-                ไม่มีการแจ้งเตือนใหม่
-              </p>
-            ) : (
-              items.map((n) => (
-                <article
-                  key={n.id}
-                  className={`rounded-xl p-3 ${
-                    n.isRead ? "bg-slate-50" : "bg-blue-50"
-                  }`}
+        <>
+          {/* Backdrop for mobile & outside click */}
+          <div
+            className="fixed inset-0 z-40 bg-black/10 sm:bg-transparent"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-x-3 top-16 z-50 sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-88 max-w-[calc(100vw-1.5rem)] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold">การแจ้งเตือน</h2>
+              {unread > 0 && (
+                <button
+                  disabled={isPending}
+                  onClick={markAll}
+                  className="text-sm font-semibold text-blue-700"
                 >
-                  <button
-                    disabled={isPending}
-                    onClick={() => markOne(n.id)}
-                    className="w-full text-left"
+                  อ่านทั้งหมด
+                </button>
+              )}
+            </div>
+            <div className="mt-2 max-h-80 space-y-2 overflow-y-auto">
+              {items.length === 0 ? (
+                <p className="p-4 text-center text-sm text-slate-500">
+                  ไม่มีการแจ้งเตือนใหม่
+                </p>
+              ) : (
+                items.map((n) => (
+                  <article
+                    key={n.id}
+                    className={`rounded-xl p-3 ${
+                      n.isRead ? "bg-slate-50" : "bg-blue-50"
+                    }`}
                   >
-                    <p className="font-bold text-slate-900">{n.title}</p>
-                    <p className="text-sm text-slate-700">{n.message}</p>
-                    <time className="mt-1 block text-xs text-slate-500">
-                      {new Intl.DateTimeFormat("th-TH", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      }).format(new Date(n.createdAt))}
-                    </time>
-                  </button>
-                  {n.serviceRequestId && (
-                    <Link
-                      onClick={() => setOpen(false)}
-                      href={
-                        pathname.startsWith("/buddy")
-                          ? n.type === "ASSIGNMENT_PENDING"
-                            ? "/buddy/open-jobs"
-                            : "/buddy/my-jobs"
-                          : "/my-bookings"
-                      }
-                      className="mt-1 inline-block text-xs font-bold text-blue-700"
+                    <button
+                      disabled={isPending}
+                      onClick={() => markOne(n.id)}
+                      className="w-full text-left"
                     >
-                      ดูรายการที่เกี่ยวข้อง
-                    </Link>
-                  )}
-                </article>
-              ))
-            )}
+                      <p className="font-bold text-slate-900">{n.title}</p>
+                      <p className="text-sm text-slate-700">{n.message}</p>
+                      <time className="mt-1 block text-xs text-slate-500">
+                        {new Intl.DateTimeFormat("th-TH", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        }).format(new Date(n.createdAt))}
+                      </time>
+                    </button>
+                    {n.serviceRequestId && (
+                      <Link
+                        onClick={() => setOpen(false)}
+                        href={
+                          pathname.startsWith("/buddy")
+                            ? n.type === "ASSIGNMENT_PENDING"
+                              ? "/buddy/open-jobs"
+                              : "/buddy/my-jobs"
+                            : "/my-bookings"
+                        }
+                        className="mt-1 inline-block text-xs font-bold text-blue-700"
+                      >
+                        ดูรายการที่เกี่ยวข้อง
+                      </Link>
+                    )}
+                  </article>
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

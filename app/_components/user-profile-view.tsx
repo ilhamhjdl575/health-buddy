@@ -205,6 +205,51 @@ export function UserProfileView({ initialData }: { initialData: UserProfileData 
           </div>
         </div>
 
+        {/* Section: ข้อมูลยานพาหนะและการเดินทาง (ผู้รับบริการ) */}
+        <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+          <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center gap-2">
+            <span>🚗</span> ข้อมูลยานพาหนะส่วนตัว (ผู้รับบริการ)
+          </h2>
+          <div className="mt-6">
+            <p className="text-base font-bold text-slate-800 mb-2">
+              ผู้รับบริการหรือครอบครัวมีรถยนต์ส่วนตัวสำหรับเดินทางหรือไม่?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, hasCar: true })}
+                className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${
+                  formData.hasCar
+                    ? "border-teal-600 bg-teal-50 ring-2 ring-teal-500 font-extrabold text-teal-950"
+                    : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span className="text-2xl">🚗</span>
+                <div>
+                  <p className="font-bold text-base">มีรถยนต์ส่วนตัว</p>
+                  <p className="text-xs text-slate-500">สามารถใช้รถในการเดินทางไปพบแพทย์ได้</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, hasCar: false })}
+                className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${
+                  !formData.hasCar
+                    ? "border-teal-600 bg-teal-50 ring-2 ring-teal-500 font-extrabold text-teal-950"
+                    : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span className="text-2xl">🚶</span>
+                <div>
+                  <p className="font-bold text-base">ไม่มีรถยนต์ส่วนตัว</p>
+                  <p className="text-xs text-slate-500">ไม่มีรถยนต์ส่วนตัวสำหรับเดินทาง</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Section 4: ข้อมูลผู้ติดต่อฉุกเฉิน */}
         <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
           <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4">

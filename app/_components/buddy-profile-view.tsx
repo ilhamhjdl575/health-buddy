@@ -318,6 +318,63 @@ export function BuddyProfileView({ initialData }: { initialData: BuddyProfileDat
           </div>
         </div>
 
+        {/* Section: ข้อมูลยานพาหนะและการเดินทาง (ผู้ส่ง / ผู้ดูแล) */}
+        <div className="rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+          <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4 flex items-center gap-2">
+            <span>🚗</span> ข้อมูลยานพาหนะส่วนตัว (ผู้ส่ง / ผู้ดูแล)
+          </h2>
+          <div className="mt-6">
+            <p className="text-base font-bold text-slate-800 mb-2">
+              ท่านมีรถยนต์ส่วนตัวที่สามารถใช้รับ-ส่งผู้รับบริการหรือไม่?
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    hasCar: true,
+                    workModes: Array.from(new Set([...formData.workModes, "HAS_CAR"])),
+                  })
+                }
+                className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${
+                  formData.hasCar
+                    ? "border-blue-600 bg-blue-50 ring-2 ring-blue-500 font-extrabold text-blue-950"
+                    : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span className="text-2xl">🚗</span>
+                <div>
+                  <p className="font-bold text-base">มีรถยนต์ส่วนตัว</p>
+                  <p className="text-xs text-slate-500">สามารถขับรถยนต์ไปรับ-ส่งผู้รับบริการได้</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    hasCar: false,
+                    workModes: formData.workModes.filter((m) => m !== "HAS_CAR"),
+                  })
+                }
+                className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition ${
+                  !formData.hasCar
+                    ? "border-blue-600 bg-blue-50 ring-2 ring-blue-500 font-extrabold text-blue-950"
+                    : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span className="text-2xl">🚶</span>
+                <div>
+                  <p className="font-bold text-base">ไม่มีรถยนต์ส่วนตัว</p>
+                  <p className="text-xs text-slate-500">เดินทางด้วยรถของผู้รับบริการหรือรถสาธารณะ</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Section 3: ข้อมูลคุณสมบัติและการรับรอง */}
         <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
           <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-4">

@@ -13,6 +13,7 @@ const mobilityValuesSchema = z.object({
   needsWalkingAssistant: z.boolean(),
   avoidsStairs: z.boolean(),
   isBedridden: z.boolean(),
+  hasCar: z.boolean().default(false),
   notes: z.string().trim().default(""),
 });
 
@@ -84,6 +85,7 @@ export async function getMyMobilityProfile(): Promise<GetMobilityProfileResult> 
         needsWalkingAssistant: mob?.needs_walking_assistance ?? false,
         avoidsStairs: mob?.difficulty_using_stairs ?? false,
         isBedridden: mob?.is_bedridden ?? false,
+        hasCar: mob?.note?.includes("รถยนต์: มีรถยนต์ส่วนตัว") ?? false,
         notes: mob?.note ?? "",
       },
     };
@@ -122,6 +124,7 @@ export async function getMyMobilityProfile(): Promise<GetMobilityProfileResult> 
       needsWalkingAssistant: mob?.needs_walking_assistance ?? false,
       avoidsStairs: mob?.difficulty_using_stairs ?? false,
       isBedridden: mob?.is_bedridden ?? false,
+      hasCar: mob?.note?.includes("รถยนต์: มีรถยนต์ส่วนตัว") ?? false,
       notes: mob?.note ?? "",
     },
   };
@@ -140,6 +143,7 @@ export async function updateMyMobilityProfile(rawInput: unknown): Promise<Update
 
   const values = parsed.data;
   const isWalkingNormally = values.walksNormally;
+  const carTag = values.hasCar ? "รถยนต์: มีรถยนต์ส่วนตัว" : "รถยนต์: ไม่มีรถยนต์ส่วนตัว";
 
   const supabase = await createClient();
 
@@ -151,6 +155,20 @@ export async function updateMyMobilityProfile(rawInput: unknown): Promise<Update
 
   if (links && links.length > 0) {
     const patientId = links[0].patient_id;
+    const { data: existingMob } = await supabase
+      .from("patient_mobility_profiles")
+      .select("note")
+      .eq("patient_id", patientId)
+      .maybeSingle();
+
+    let combinedNote = values.notes.trim();
+    const existing = existingMob?.note || "";
+    if (existing.includes("ที่อยู่:")) {
+      const match = existing.match(/ที่อยู่:\s*([^|]+)/);
+      if (match) combinedNote = combinedNote ? `ที่อยู่: ${match[1].trim()} | ${combinedNote}` : `ที่อยู่: ${match[1].trim()}`;
+    }
+    combinedNote = combinedNote ? `${combinedNote} | ${carTag}` : carTag;
+
     const { error } = await supabase
       .from("patient_mobility_profiles")
       .update({
@@ -161,7 +179,7 @@ export async function updateMyMobilityProfile(rawInput: unknown): Promise<Update
         needs_walking_assistance: isWalkingNormally ? false : values.needsWalkingAssistant,
         difficulty_using_stairs: isWalkingNormally ? false : values.avoidsStairs,
         is_bedridden: isWalkingNormally ? false : values.isBedridden,
-        note: values.notes.trim() || null,
+        note: combinedNote || null,
         updated_at: new Date().toISOString(),
       })
       .eq("patient_id", patientId);
@@ -171,6 +189,20 @@ export async function updateMyMobilityProfile(rawInput: unknown): Promise<Update
     }
   } else {
     // 2. Patient Self - update mobility_profiles
+    const { data: existingMob } = await supabase
+      .from("mobility_profiles")
+      .select("note")
+      .eq("user_id", current.profileId)
+      .maybeSingle();
+
+    let combinedNote = values.notes.trim();
+    const existing = existingMob?.note || "";
+    if (existing.includes("ที่อยู่:")) {
+      const match = existing.match(/ที่อยู่:\s*([^|]+)/);
+      if (match) combinedNote = combinedNote ? `ที่อยู่: ${match[1].trim()} | ${combinedNote}` : `ที่อยู่: ${match[1].trim()}`;
+    }
+    combinedNote = combinedNote ? `${combinedNote} | ${carTag}` : carTag;
+
     const updatePayload = {
       uses_wheelchair: isWalkingNormally ? false : values.usesWheelchair,
       uses_cane: isWalkingNormally ? false : values.usesCane,
@@ -178,7 +210,7 @@ export async function updateMyMobilityProfile(rawInput: unknown): Promise<Update
       needs_walking_assistance: isWalkingNormally ? false : values.needsWalkingAssistant,
       difficulty_using_stairs: isWalkingNormally ? false : values.avoidsStairs,
       is_bedridden: isWalkingNormally ? false : values.isBedridden,
-      note: values.notes.trim() || null,
+      note: combinedNote || null,
       updated_at: new Date().toISOString(),
     };
 

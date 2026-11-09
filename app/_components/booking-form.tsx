@@ -13,6 +13,8 @@ type FormState = {
   endTime: string;
   pickupAddress: string;
   destinationAddress: string;
+  recipientHasCar: boolean;
+  needBuddyCar: boolean;
   notes: string;
 };
 
@@ -39,6 +41,8 @@ export function BookingForm({
     endTime: "",
     pickupAddress: initialRecipient?.address ?? "",
     destinationAddress: "",
+    recipientHasCar: initialRecipient?.mobilityBadges?.includes("มีรถยนต์ส่วนตัว") ?? false,
+    needBuddyCar: false,
     notes: "",
   });
 
@@ -87,6 +91,12 @@ export function BookingForm({
     setSubmitting(true);
     idempotencyKey.current ??= crypto.randomUUID();
 
+    const carTag = form.recipientHasCar
+      ? "[รถยนต์ผู้รับบริการ: มีรถยนต์ส่วนตัว]"
+      : "[รถยนต์ผู้รับบริการ: ไม่มีรถยนต์ส่วนตัว]";
+    const needCarTag = form.needBuddyCar ? "[ต้องการผู้ดูแลที่มีรถยนต์ส่วนตัว]" : "";
+    const combinedNotes = [carTag, needCarTag, form.notes.trim()].filter(Boolean).join(" ");
+
     const result = await createServiceRequest({
       recipientId: recipient.id,
       serviceType: form.serviceType,
@@ -95,7 +105,7 @@ export function BookingForm({
       endTime: form.endTime || null,
       pickupAddress: form.pickupAddress.trim(),
       destinationAddress: form.destinationAddress.trim() || null,
-      notes: form.notes.trim() || null,
+      notes: combinedNotes || null,
       idempotencyKey: idempotencyKey.current,
     });
 
@@ -338,7 +348,69 @@ export function BookingForm({
         </div>
       </fieldset>
 
-      {/* 4. สถานที่และหมายเหตุ */}
+      {/* 4. ข้อมูลยานพาหนะและการเดินทาง */}
+      <fieldset className="space-y-4 border-t border-slate-200 pt-5">
+        <legend className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <span>🚗</span> ข้อมูลยานพาหนะและการเดินทาง
+        </legend>
+
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            ผู้รับบริการมีรถยนต์ส่วนตัวสำหรับการเดินทางหรือไม่? <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => update("recipientHasCar", true)}
+              className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 text-left transition ${
+                form.recipientHasCar
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-500 font-extrabold text-teal-950"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span className="text-2xl">🚗</span>
+              <div>
+                <p className="font-bold text-sm">มีรถยนต์ส่วนตัว</p>
+                <p className="text-xs text-slate-500">สามารถใช้รถของผู้รับบริการในการเดินทางได้</p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => update("recipientHasCar", false)}
+              className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 text-left transition ${
+                !form.recipientHasCar
+                  ? "border-teal-600 bg-teal-50 ring-2 ring-teal-500 font-extrabold text-teal-950"
+                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <span className="text-2xl">🚶</span>
+              <div>
+                <p className="font-bold text-sm">ไม่มีรถยนต์ส่วนตัว</p>
+                <p className="text-xs text-slate-500">ต้องการให้ผู้ส่ง/ผู้ดูแลมีรถ หรือใช้รถสาธารณะ</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {form.serviceType === "DOCTOR_VISIT" && (
+          <div className="pt-1">
+            <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100">
+              <input
+                type="checkbox"
+                checked={form.needBuddyCar}
+                onChange={(e) => update("needBuddyCar", e.target.checked)}
+                className="size-5 rounded text-teal-600 focus:ring-teal-500"
+              />
+              <span className="text-sm font-bold text-slate-800">
+                ต้องการให้ผู้ส่ง (ผู้ดูแล) มีรถยนต์ส่วนตัวในการมารับ-ส่ง
+              </span>
+            </label>
+          </div>
+        )}
+      </fieldset>
+
+      {/* 5. สถานที่และหมายเหตุ */}
       <fieldset className="space-y-4 border-t border-slate-200 pt-5">
         <legend className="text-xl font-bold text-slate-900">สถานที่และหมายเหตุ</legend>
 
