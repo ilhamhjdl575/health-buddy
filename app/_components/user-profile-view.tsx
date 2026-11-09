@@ -187,7 +187,7 @@ export function UserProfileView({ initialData }: { initialData: UserProfileData 
             ที่อยู่สำหรับรับบริการ
           </h2>
           <p className="mt-2 text-base text-slate-600">
-            สถานที่สำหรับให้ผู้ดูแล (Buddy) เดินทางไปรับหรือไปให้บริการ
+            สถานที่สำหรับให้ผู้ดูแลเดินทางไปรับหรือไปให้บริการ
           </p>
 
           <div className="mt-5">

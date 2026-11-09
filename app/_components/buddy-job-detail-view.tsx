@@ -29,7 +29,7 @@ export type BuddyJobDetailProps = {
 const STATUS_LABELS: Record<string, string> = {
   REQUESTED: "รอการตอบรับ",
   OPEN: "เปิดรับงาน",
-  MATCHING: "รอ Buddy ยืนยัน",
+  MATCHING: "รอผู้ดูแลยืนยัน",
   ACCEPTED: "รับงานแล้ว",
   ON_THE_WAY: "กำลังเดินทาง",
   ARRIVED: "ถึงจุดรับแล้ว",

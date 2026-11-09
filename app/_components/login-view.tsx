@@ -251,7 +251,7 @@ export function LoginView() {
                   className="w-full rounded-2xl border-2 border-slate-300 px-4 py-3 text-lg font-medium text-slate-950 placeholder-slate-400 focus:border-teal-600 focus:outline-none"
                 />
                 <p className="text-xs text-slate-500">
-                  กรอกเบอร์โทรศัพท์ 10 หลัก ระบบจะแปลงเป็น +66 อัตโนมัติเพื่อส่งรหัส OTP ทาง SMS
+                  กรอกเบอร์โทรศัพท์ 10 หลัก เพื่อขอรับรหัสยืนยันทางข้อความมือถือ (SMS)
                 </p>
               </div>
 
@@ -266,10 +266,10 @@ export function LoginView() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                     </svg>
-                    กำลังส่งรหัส OTP...
+                    กำลังส่งรหัสยืนยัน...
                   </span>
                 ) : (
-                  <span>ส่งรหัส OTP</span>
+                  <span>ขอรับรหัสยืนยัน</span>
                 )}
               </button>
             </form>
@@ -280,7 +280,7 @@ export function LoginView() {
             <form onSubmit={handleVerifyOtp} className="space-y-4">
               <div>
                 <h2 id="primary-login-heading" className="text-xl font-bold text-slate-900">
-                  ยืนยันรหัส OTP
+                  กรอกรหัสยืนยันทางข้อความ
                 </h2>
                 <div className="mt-1 flex items-center justify-between text-sm text-slate-600">
                   <span>ส่งรหัสไปยัง <strong className="text-slate-900">{displayPhone}</strong></span>
@@ -300,7 +300,7 @@ export function LoginView() {
 
               <div className="space-y-1.5">
                 <label htmlFor="otp-input" className="block text-sm font-semibold text-slate-700">
-                  รหัส OTP 6 หลัก
+                  รหัสยืนยัน 6 หลัก
                 </label>
                 <input
                   id="otp-input"
@@ -328,10 +328,10 @@ export function LoginView() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                     </svg>
-                    กำลังยืนยันรหัส...
+                    กำลังตรวจสอบรหัส...
                   </span>
                 ) : (
-                  <span>ยืนยันรหัส OTP</span>
+                  <span>ยืนยันเข้าสู่ระบบ</span>
                 )}
               </button>
 

@@ -193,7 +193,7 @@ export function SignupView() {
     }
     if (!buddyData.religion) errs.religion = "กรุณาเลือกศาสนา";
     if (!buddyData.gender) errs.gender = "กรุณาเลือกเพศ";
-    if (buddyData.buddyTypes.length === 0) errs.buddyTypes = "กรุณาเลือกประเภท Buddy อย่างน้อย 1 ประเภท";
+    if (buddyData.buddyTypes.length === 0) errs.buddyTypes = "กรุณาเลือกประเภทผู้ดูแลอย่างน้อย 1 ประเภท";
     buddyData.buddyTypes.forEach((type) => {
       if (!buddyData.certificates[type]) errs[`certificate-${type}`] = "กรุณาอัปโหลดใบรับรอง";
     });
@@ -265,7 +265,7 @@ export function SignupView() {
             </div>
 
             <span className="mt-5 inline-block rounded-full bg-teal-100 px-4 py-1 text-sm font-bold text-teal-800">
-              {isUser ? "สมัครสมาชิกผู้รับบริการสำเร็จ" : "สมัครสมาชิกผู้ดูแล (Buddy) สำเร็จ"}
+              {isUser ? "สมัครสมาชิกผู้รับบริการสำเร็จ" : "สมัครสมาชิกผู้ดูแลสำเร็จ"}
             </span>
 
             <h1 className="mt-3 text-3xl font-extrabold text-slate-950 sm:text-4xl">
@@ -399,7 +399,7 @@ export function SignupView() {
                     </div>
 
                     <h3 className="mt-4 text-2xl font-black text-slate-950 group-hover:text-teal-900 transition-colors">
-                      ผู้รับบริการ (User)
+                      ผู้รับบริการ
                     </h3>
                     <p className="mt-1 text-sm font-semibold text-slate-600">
                       ผู้สูงอายุ / ผู้ป่วย / ผู้ขอความช่วยเหลือ
@@ -411,13 +411,16 @@ export function SignupView() {
 
                     <ul className="mt-4 space-y-2 border-t border-teal-100 pt-3 text-xs font-bold text-teal-900">
                       <li className="flex items-center gap-2">
-                        <span className="text-teal-600">✔</span> ขอรับความช่วยเหลือสะดวกในชุมชน
+                        <svg className="size-4 shrink-0 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>ขอรับความช่วยเหลือสะดวกในชุมชน</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-teal-600">✔</span> มีผู้ดูแลคอยช่วยเหลืออย่างปลอดภัย
+                        <svg className="size-4 shrink-0 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>มีผู้ดูแลคอยช่วยเหลืออย่างปลอดภัย</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-teal-600">✔</span> บันทึกข้อมูลการเคลื่อนไหวเพื่อการดูแลที่เหมาะสม
+                        <svg className="size-4 shrink-0 text-teal-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>บันทึกข้อมูลการเคลื่อนไหวเพื่อการดูแลที่เหมาะสม</span>
                       </li>
                     </ul>
                   </div>
@@ -446,7 +449,7 @@ export function SignupView() {
                     </div>
 
                     <h3 className="mt-4 text-2xl font-black text-slate-950 group-hover:text-blue-900 transition-colors">
-                      ผู้ดูแล (Buddy)
+                      ผู้ดูแลชุมชน
                     </h3>
                     <p className="mt-1 text-sm font-semibold text-slate-600">
                       ผู้ดูแลผู้สูงอายุ / จิตอาสาในชุมชน
@@ -458,19 +461,22 @@ export function SignupView() {
 
                     <ul className="mt-4 space-y-2 border-t border-blue-100 pt-3 text-xs font-bold text-blue-900">
                       <li className="flex items-center gap-2">
-                        <span className="text-blue-600">✔</span> เลือกเวลารับงานตามความสะดวก
+                        <svg className="size-4 shrink-0 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>เลือกเวลารับงานตามความสะดวก</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-blue-600">✔</span> ช่วยเหลือผู้สูงอายุในละแวกใกล้บ้าน
+                        <svg className="size-4 shrink-0 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>ช่วยเหลือผู้สูงอายุในละแวกใกล้บ้าน</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-blue-600">✔</span> มีระบบข้อมูลงานและประวัติชัดเจน
+                        <svg className="size-4 shrink-0 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>มีระบบข้อมูลงานและประวัติชัดเจน</span>
                       </li>
                     </ul>
                   </div>
 
                   <div className="mt-6 flex min-h-12 w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-base font-bold text-white shadow-xs group-hover:bg-blue-800 transition">
-                    <span>สมัครเป็นผู้ดูแล (Buddy) →</span>
+                    <span>สมัครเป็นผู้ดูแลชุมชน →</span>
                   </div>
                 </button>
               </div>
@@ -504,7 +510,7 @@ export function SignupView() {
                 </span>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-teal-800">บทบาทที่เลือก</p>
-                  <p className="text-lg font-black text-teal-950">ผู้รับบริการ (User)</p>
+                  <p className="text-lg font-black text-teal-950">ผู้รับบริการ</p>
                 </div>
               </div>
               <button
@@ -840,7 +846,7 @@ export function SignupView() {
               )}
 
               <div className={`order-7 rounded-2xl border border-teal-200 bg-teal-50 p-4 text-sm font-semibold leading-6 text-teal-950 ${userData.applicantType ? "" : "hidden"}`}>
-                Health Buddy ใช้การเข้าสู่ระบบแบบไม่ใช้รหัสผ่าน ผ่านเบอร์โทรศัพท์และ OTP หรือบัญชี Google
+                Health Buddy ใช้การเข้าสู่ระบบแบบไม่ใช้รหัสผ่าน ผ่านเบอร์โทรศัพท์ด้วยรหัสยืนยันทางข้อความ (SMS) หรือบัญชี Google
               </div>
 
               {/* Submit Buttons */}
@@ -883,7 +889,7 @@ export function SignupView() {
                 </span>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-blue-800">บทบาทที่เลือก</p>
-                  <p className="text-lg font-black text-blue-950">ผู้ดูแล (Buddy)</p>
+                  <p className="text-lg font-black text-blue-950">ผู้ดูแลชุมชน</p>
                 </div>
               </div>
               <button
@@ -906,7 +912,7 @@ export function SignupView() {
                   ขั้นตอนที่ 2 จาก 2
                 </span>
                 <h2 id="buddy-form-heading" className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">
-                  กรอกข้อมูลผู้ดูแล (Buddy)
+                  กรอกข้อมูลผู้ดูแลชุมชน
                 </h2>
                 <p className="mt-1 text-sm text-slate-600 sm:text-base">
                   ข้อมูลนี้ใช้สำหรับการตรวจสอบตัวตน เพื่อความปลอดภัยสูงสุดของผู้สูงอายุในชุมชน
@@ -1010,11 +1016,11 @@ export function SignupView() {
               </fieldset>
 
               <fieldset className="space-y-4 border-t border-slate-100 pt-5">
-                <legend className="text-lg font-bold text-slate-900">ประเภทของ Buddy (เลือกได้มากกว่า 1 ประเภท)</legend>
+                <legend className="text-lg font-bold text-slate-900">ประเภทของผู้ดูแล (เลือกได้มากกว่า 1 ประเภท)</legend>
                 {errors.buddyTypes && <p className="text-sm font-bold text-red-600">{errors.buddyTypes}</p>}
                 {([
                   ["VILLAGE_HEALTH_VOLUNTEER", "อสม."],
-                  ["CAREGIVER_420_HOURS", "พนักงานผู้ช่วยผู้ป่วย Caregiver (อบรม 420 ชั่วโมง)"],
+                  ["CAREGIVER_420_HOURS", "พนักงานผู้ช่วยผู้ป่วย (ผ่านการอบรม 420 ชั่วโมง)"],
                 ] as const).map(([type, label]) => {
                   const checked = buddyData.buddyTypes.includes(type);
                   return (
@@ -1073,7 +1079,7 @@ export function SignupView() {
                   disabled={isSubmitting}
                   className="flex min-h-16 w-full items-center justify-center rounded-2xl bg-blue-700 px-6 text-xl font-bold text-white shadow-md shadow-blue-900/15 transition hover:bg-blue-800 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-blue-700 active:scale-[0.99]"
                 >
-                  {isSubmitting ? "กำลังบันทึกข้อมูล..." : "ยืนยันการสมัครสมาชิกผู้ดูแล (Buddy)"}
+                  {isSubmitting ? "กำลังบันทึกข้อมูล..." : "ยืนยันการสมัครสมาชิกผู้ดูแล"}
                 </button>
 
                 <button

@@ -19,6 +19,6 @@ export default async function BuddyHomePage() {
   ]);
   const activeJobs = accepted.filter((job) => job.requestStatus !== "COMPLETED");
   const nextJob = [...activeJobs].sort((a, b) => `${a.serviceDate}T${a.startTime}`.localeCompare(`${b.serviceDate}T${b.startTime}`))[0] ?? null;
-  const name = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() || "Buddy";
+  const name = `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() || "ผู้ดูแล";
   return <BuddyDashboard name={name} pendingCount={pending.success ? pending.assignments.length : 0} acceptedCount={activeJobs.length} todayCount={today.length} nextJob={nextJob} />;
 }

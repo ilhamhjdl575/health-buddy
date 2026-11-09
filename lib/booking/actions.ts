@@ -11,6 +11,7 @@ export type BookableRecipient = {
   isBedridden: boolean;
   kind: "SELF" | "PATIENT";
   mobilityBadges?: string[];
+  address?: string;
 };
 
 export type BookingListItem = {
@@ -79,7 +80,7 @@ export async function getBookableRecipients(): Promise<
   const supabase = await createClient();
   const { data: links, error } = await supabase
     .from("caregiver_patient_links")
-    .select("patient_id, patients(first_name, last_name, patient_mobility_profiles(*))")
+    .select("patient_id, patients(first_name, last_name, address, patient_mobility_profiles(*))")
     .eq("caregiver_profile_id", current.profileId);
   if (error) return { success: false, error: "ไม่สามารถโหลดรายชื่อผู้รับบริการได้" };
 
@@ -90,6 +91,7 @@ export async function getBookableRecipients(): Promise<
         const patient = link.patients as unknown as {
           first_name: string;
           last_name: string;
+          address: string | null;
           patient_mobility_profiles: Array<{
             is_bedridden: boolean;
             uses_wheelchair: boolean;
@@ -106,16 +108,38 @@ export async function getBookableRecipients(): Promise<
           isBedridden: mob?.is_bedridden ?? false,
           kind: "PATIENT" as const,
           mobilityBadges: extractMobilityBadges(mob),
+          address: patient.address || "",
         };
       }),
     };
   }
 
-  const [{ data: profile }, { data: mobility }] = await Promise.all([
+  const [{ data: profile }, { data: mobility }, { data: latestBooking }] = await Promise.all([
     supabase.from("profiles").select("first_name, last_name").eq("id", current.profileId).single(),
     supabase.from("mobility_profiles").select("*").eq("user_id", current.profileId).maybeSingle(),
+    supabase
+      .from("service_requests")
+      .select("pickup_address")
+      .eq("requester_profile_id", current.profileId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
   if (!profile) return { success: false, error: "ไม่พบข้อมูลผู้รับบริการ" };
+
+  let address = "";
+  if (mobility?.note) {
+    const match = mobility.note.match(/ที่อยู่:\s*([^|]+)/);
+    if (match) {
+      address = match[1].trim();
+    } else if (!mobility.note.includes("เดิน") && !mobility.note.includes("ช่วยเหลือ")) {
+      address = mobility.note.trim();
+    }
+  }
+  if (!address && latestBooking?.pickup_address) {
+    address = latestBooking.pickup_address.trim();
+  }
+
   return {
     success: true,
     recipients: [
@@ -125,6 +149,7 @@ export async function getBookableRecipients(): Promise<
         isBedridden: mobility?.is_bedridden ?? false,
         kind: "SELF",
         mobilityBadges: extractMobilityBadges(mobility),
+        address,
       },
     ],
   };

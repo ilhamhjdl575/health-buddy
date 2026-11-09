@@ -15,7 +15,7 @@ async function SelectBuddyContent({ params }: { params: Promise<{ requestId: str
 export default async function SelectBuddyPage({ params }: { params: Promise<{ requestId: string }> }) {
   await requireRole("USER", "/my-bookings");
   return (
-    <Suspense fallback={<p className="p-4 text-slate-600">กำลังโหลดรายชื่อ Buddy...</p>}>
+    <Suspense fallback={<p className="p-4 text-slate-600">กำลังโหลดรายชื่อผู้ดูแล...</p>}>
       <SelectBuddyContent params={params} />
     </Suspense>
   );

@@ -18,30 +18,6 @@ type FormState = {
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-const TIME_PERIODS = [
-  {
-    id: "OFFICIAL" as const,
-    title: "ในเวลาราชการ",
-    sentence: "วันจันทร์ – วันศุกร์ เวลา 08:30 – 16:30 น.",
-    start: "08:30",
-    end: "16:30",
-  },
-  {
-    id: "OVERTIME_WEEKDAY" as const,
-    title: "นอกเวลาราชการ (วันธรรมดา)",
-    sentence: "วันจันทร์ – วันศุกร์ ช่วงเย็น เวลา 16:30 – 20:30 น.",
-    start: "16:30",
-    end: "20:30",
-  },
-  {
-    id: "WEEKEND_HOLIDAY" as const,
-    title: "วันหยุดเสาร์ – อาทิตย์ และวันหยุดราชการ",
-    sentence: "วันเสาร์ – วันอาทิตย์ และวันหยุดนักขัตฤกษ์ เวลา 08:30 – 16:30 น.",
-    start: "08:30",
-    end: "16:30",
-  },
-];
-
 export function BookingForm({
   recipients,
   initialService,
@@ -49,8 +25,9 @@ export function BookingForm({
   recipients: BookableRecipient[];
   initialService?: string;
 }) {
+  const initialRecipient = recipients[0];
   const [form, setForm] = useState<FormState>({
-    recipientId: recipients[0]?.id ?? "self",
+    recipientId: initialRecipient?.id ?? "self",
     serviceType:
       initialService === "bedridden"
         ? "BEDRIDDEN_CARE"
@@ -60,7 +37,7 @@ export function BookingForm({
     serviceDate: "",
     startTime: "",
     endTime: "",
-    pickupAddress: "",
+    pickupAddress: initialRecipient?.address ?? "",
     destinationAddress: "",
     notes: "",
   });
@@ -68,7 +45,6 @@ export function BookingForm({
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<string | null>(null);
-  const [selectedPeriods, setSelectedPeriods] = useState<string[]>([]);
   const idempotencyKey = useRef<string | null>(null);
 
   const recipient = useMemo(
@@ -78,33 +54,6 @@ export function BookingForm({
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((current) => ({ ...current, [key]: value }));
-
-  const togglePeriod = (id: "OFFICIAL" | "OVERTIME_WEEKDAY" | "WEEKEND_HOLIDAY") => {
-    const next = selectedPeriods.includes(id)
-      ? selectedPeriods.filter((p) => p !== id)
-      : [...selectedPeriods, id];
-
-    setSelectedPeriods(next);
-
-    if (next.length === 0) {
-      setForm((current) => ({
-        ...current,
-        startTime: "",
-        endTime: "",
-      }));
-      return;
-    }
-
-    const selectedObjs = TIME_PERIODS.filter((p) => next.includes(p.id));
-    const earliestStart = [...selectedObjs].map((p) => p.start).sort()[0];
-    const latestEnd = [...selectedObjs].map((p) => p.end).sort().reverse()[0];
-
-    setForm((current) => ({
-      ...current,
-      startTime: earliestStart,
-      endTime: latestEnd,
-    }));
-  };
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -164,14 +113,14 @@ export function BookingForm({
           ส่งคำขอรับบริการแล้ว
         </h1>
         <p className="mt-3 text-lg text-slate-700">
-          กรุณาเลือก Buddy ที่ต้องการให้ช่วยดูแล
+          กรุณาเลือกผู้ดูแลที่ต้องการให้ช่วยดูแล
         </p>
         <div className="mt-7">
           <Link
             href={`/my-bookings/${requestId}/select-buddy`}
             className="inline-flex min-h-14 items-center justify-center rounded-2xl bg-teal-700 px-8 text-lg font-bold text-white transition hover:bg-teal-800 active:scale-[0.98]"
           >
-            เลือก Buddy
+            เลือกผู้ดูแล
           </Link>
         </div>
       </section>
@@ -200,7 +149,15 @@ export function BookingForm({
             <select
               id="recipientSelect"
               value={form.recipientId}
-              onChange={(e) => update("recipientId", e.target.value)}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                const nextRec = recipients.find((item) => (item.id ?? "self") === nextId);
+                setForm((current) => ({
+                  ...current,
+                  recipientId: nextId,
+                  pickupAddress: nextRec?.address || current.pickupAddress,
+                }));
+              }}
               className={inputClasses}
             >
               {recipients.map((item) => (
@@ -351,48 +308,6 @@ export function BookingForm({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            ช่วงเวลาที่ต้องการรับบริการ <span className="text-red-600">*</span>{" "}
-            <span className="text-xs font-normal text-slate-500">(ติ๊กเลือกได้มากกว่า 1 ข้อ)</span>
-          </label>
-          <div className="space-y-2.5">
-            {TIME_PERIODS.map((period) => {
-              const isSelected = selectedPeriods.includes(period.id);
-              return (
-                <button
-                  key={period.id}
-                  type="button"
-                  onClick={() => togglePeriod(period.id)}
-                  className={`flex w-full items-start gap-3 rounded-xl border-2 p-3.5 text-left transition-all active:scale-[0.99] ${
-                    isSelected
-                      ? "border-teal-700 bg-teal-50/80 shadow-xs ring-1 ring-teal-600"
-                      : "border-slate-300 bg-white hover:border-teal-400"
-                  }`}
-                >
-                  <span
-                    className={`mt-0.5 size-5 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors ${
-                      isSelected
-                        ? "border-teal-700 bg-teal-700 text-white"
-                        : "border-slate-400 bg-white"
-                    }`}
-                  >
-                    {isSelected && (
-                      <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </span>
-                  <div>
-                    <p className="text-base font-bold text-slate-900">{period.title}</p>
-                    <p className="text-sm text-slate-600 mt-0.5">{period.sentence}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="startTime" className="block text-sm font-semibold text-slate-700">
@@ -428,9 +343,16 @@ export function BookingForm({
         <legend className="text-xl font-bold text-slate-900">สถานที่และหมายเหตุ</legend>
 
         <div>
-          <label htmlFor="pickupAddress" className="block text-sm font-semibold text-slate-700">
-            จุดรับบริการ <span className="text-red-600">*</span>
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="pickupAddress" className="block text-sm font-semibold text-slate-700">
+              จุดรับบริการ <span className="text-red-600">*</span>
+            </label>
+            {recipient?.address && form.pickupAddress === recipient.address && (
+              <span className="text-xs font-semibold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200">
+                ดึงจากที่อยู่ที่บันทึกไว้
+              </span>
+            )}
+          </div>
           <input
             id="pickupAddress"
             required
@@ -439,6 +361,15 @@ export function BookingForm({
             placeholder="บ้านเลขที่ ซอย ถนน หรือจุดนัดพบ"
             className={inputClasses}
           />
+          {recipient?.address && form.pickupAddress !== recipient.address && (
+            <button
+              type="button"
+              onClick={() => update("pickupAddress", recipient.address || "")}
+              className="mt-1 text-xs font-bold text-teal-700 hover:text-teal-900 underline"
+            >
+              ใช้ที่อยู่ที่บันทึกไว้ ({recipient.address})
+            </button>
+          )}
         </div>
 
         <div>

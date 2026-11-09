@@ -119,7 +119,7 @@ export function BuddyNav({profileId,notifications}:{profileId?:string;notificati
               Health Buddy
             </Link>
             <span className="inline-block rounded-md bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800 border border-blue-200">
-              สำหรับผู้ดูแล (Buddy)
+              สำหรับผู้ดูแลชุมชน
             </span>
           </div>
         </div>

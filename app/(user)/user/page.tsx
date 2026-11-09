@@ -6,6 +6,18 @@ import { createClient } from "@/lib/supabase/server";
 import { getMyBookings } from "@/lib/booking/actions";
 import { SERVICE_LABELS } from "@/app/_lib/services";
 
+const STATUS_LABELS: Record<string, string> = {
+  REQUESTED: "รอการตอบรับ",
+  OPEN: "รอเลือกผู้ดูแล",
+  MATCHING: "รอผู้ดูแลยืนยัน",
+  ACCEPTED: "ผู้ดูแลรับงานแล้ว",
+  ON_THE_WAY: "ผู้ดูแลกำลังเดินทาง",
+  ARRIVED: "ผู้ดูแลถึงจุดรับแล้ว",
+  IN_PROGRESS: "กำลังให้ความช่วยเหลือ",
+  COMPLETED: "เสร็จสิ้น",
+  CANCELLED: "ยกเลิกแล้ว",
+};
+
 export const instant = false;
 
 export default async function UserHomePage() {
@@ -61,7 +73,7 @@ export default async function UserHomePage() {
           <div className="mt-4 text-lg text-slate-700">
             <p className="font-bold text-slate-950">{SERVICE_LABELS[nextBooking.serviceType]}</p>
             <p className="mt-1">{nextBooking.serviceDate} · {nextBooking.startTime}{nextBooking.endTime ? ` - ${nextBooking.endTime}` : ""}</p>
-            <p className="mt-1">สถานะ: <strong>{nextBooking.status}</strong></p>
+            <p className="mt-1">สถานะ: <strong>{STATUS_LABELS[nextBooking.status] ?? nextBooking.status}</strong></p>
           </div>
         ) : (
           <p className="mt-4 text-lg text-slate-600">ยังไม่มีรายการรับบริการที่กำลังดำเนินการ</p>

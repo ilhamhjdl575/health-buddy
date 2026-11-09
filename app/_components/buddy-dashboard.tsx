@@ -12,6 +12,18 @@ const menuItems = [
   { label: "ข้อมูลส่วนตัว", href: "/buddy/profile" },
 ];
 
+const STATUS_LABELS: Record<string, string> = {
+  REQUESTED: "รอการตอบรับ",
+  OPEN: "เปิดรับงาน",
+  MATCHING: "รอการตอบรับ",
+  ACCEPTED: "รับงานแล้ว",
+  ON_THE_WAY: "กำลังเดินทาง",
+  ARRIVED: "ถึงจุดรับแล้ว",
+  IN_PROGRESS: "กำลังช่วยเหลือ",
+  COMPLETED: "เสร็จสิ้นงาน",
+  CANCELLED: "ยกเลิกแล้ว",
+};
+
 export function BuddyDashboard({ name, pendingCount, acceptedCount, todayCount, nextJob }: {
   name: string;
   pendingCount: number;
@@ -27,8 +39,8 @@ export function BuddyDashboard({ name, pendingCount, acceptedCount, todayCount, 
   return (
     <div className="mx-auto max-w-5xl space-y-7 pb-6">
       <section aria-labelledby="buddy-welcome-title">
-        <p className="text-lg font-bold text-blue-800">Health Buddy สำหรับผู้ดูแล (Buddy)</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-950 sm:text-4xl" id="buddy-welcome-title">สวัสดี {name} (ผู้ดูแล)</h1>
+        <p className="text-lg font-bold text-blue-800">Health Buddy สำหรับผู้ดูแลชุมชน</p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-950 sm:text-4xl" id="buddy-welcome-title">สวัสดีคุณ {name}</h1>
         <p className="mt-3 text-xl text-slate-700">ดูงานและการช่วยเหลือของคุณวันนี้</p>
       </section>
 
@@ -51,7 +63,7 @@ export function BuddyDashboard({ name, pendingCount, acceptedCount, todayCount, 
           <div><dt className="font-semibold text-slate-600">วันและเวลา</dt><dd className="mt-1 text-xl font-bold">{nextJob.serviceDate}, {nextJob.startTime}{nextJob.endTime ? ` - ${nextJob.endTime}` : ""}</dd></div>
           <div><dt className="font-semibold text-slate-600">ประเภทงาน</dt><dd className="mt-1 text-xl font-bold">{SERVICE_LABELS[nextJob.serviceType as ServiceType] ?? nextJob.serviceType}</dd></div>
           <div><dt className="font-semibold text-slate-600">ผู้รับบริการ</dt><dd className="mt-1 text-xl font-bold">{nextJob.recipientName}</dd></div>
-          <div><dt className="font-semibold text-slate-600">สถานะ</dt><dd className="mt-1 text-xl font-bold">{nextJob.requestStatus}</dd></div>
+          <div><dt className="font-semibold text-slate-600">สถานะ</dt><dd className="mt-1 text-xl font-bold">{STATUS_LABELS[nextJob.requestStatus] ?? nextJob.requestStatus}</dd></div>
         </dl> : <p className="mt-4 text-lg text-slate-700">ยังไม่มีงานที่ตอบรับไว้</p>}
       </section>
 

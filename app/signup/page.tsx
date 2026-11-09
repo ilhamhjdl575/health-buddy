@@ -7,7 +7,7 @@ import { SignupView } from "@/app/_components/signup-view";
 
 export const metadata = {
   title: "สมัครสมาชิก | Health Buddy",
-  description: "สมัครสมาชิก Health Buddy เลือกระหว่างผู้รับบริการ (User) หรือผู้ดูแล (Buddy)",
+  description: "สมัครสมาชิก Health Buddy เลือกระหว่างผู้รับบริการหรือผู้ดูแลชุมชน",
 };
 
 async function ExistingProfileRedirect() {

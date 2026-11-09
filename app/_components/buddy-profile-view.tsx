@@ -10,7 +10,7 @@ const QUALIFICATION_LABELS: Record<string, { title: string; desc: string }> = {
     desc: "ให้บริการ: ไปเป็นเพื่อนหาหมอ",
   },
   CAREGIVER_420_HOURS: {
-    title: "ผู้ดูแลผู้สูงอายุ 420 ชั่วโมง (Caregiver)",
+    title: "ผู้ดูแลผู้สูงอายุ (ผ่านการอบรม 420 ชั่วโมง)",
     desc: "ให้บริการ: ดูแลผู้ป่วยติดเตียง",
   },
   BEDRIDDEN_CARE_TRAINING: {
@@ -74,7 +74,7 @@ export function BuddyProfileView({ initialData }: { initialData: BuddyProfileDat
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-          ข้อมูลส่วนตัวผู้ดูแล (Buddy)
+          ข้อมูลส่วนตัวผู้ดูแล
         </h1>
         <p className="mt-2 text-lg text-slate-600">
           จัดการข้อมูลส่วนตัว พื้นที่ให้บริการ และรูปแบบการรับงาน

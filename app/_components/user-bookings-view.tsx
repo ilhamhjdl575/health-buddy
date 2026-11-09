@@ -3,11 +3,12 @@ import { SERVICE_LABELS } from "@/app/_lib/services";
 import type { BookingListItem } from "@/lib/booking/actions";
 
 const STATUS_LABELS: Record<string, string> = {
-  OPEN: "รอเลือก Buddy",
-  MATCHING: "รอ Buddy ยืนยัน",
-  ACCEPTED: "Buddy รับงานแล้ว",
-  ON_THE_WAY: "Buddy กำลังเดินทาง",
-  ARRIVED: "Buddy ถึงจุดรับแล้ว",
+  REQUESTED: "รอการตอบรับ",
+  OPEN: "รอเลือกผู้ดูแล",
+  MATCHING: "รอผู้ดูแลยืนยัน",
+  ACCEPTED: "ผู้ดูแลรับงานแล้ว",
+  ON_THE_WAY: "ผู้ดูแลกำลังเดินทาง",
+  ARRIVED: "ผู้ดูแลถึงจุดรับแล้ว",
   IN_PROGRESS: "กำลังให้ความช่วยเหลือ",
   COMPLETED: "เสร็จสิ้น",
 };
@@ -74,9 +75,9 @@ export function UserBookingsView({ bookings }: { bookings: BookingListItem[] }) 
                   <div className="mt-4 pt-3 border-t border-slate-100">
                     <Link
                       href={`/my-bookings/${b.id}/select-buddy`}
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-700 px-5 text-base font-bold text-white hover:bg-blue-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue-800"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-700 px-5 text-base font-bold text-white hover:bg-teal-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                     >
-                      เลือก Buddy
+                      เลือกผู้ดูแล
                     </Link>
                   </div>
                 )}

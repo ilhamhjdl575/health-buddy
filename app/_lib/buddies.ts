@@ -19,7 +19,7 @@ export const AVAILABLE_BUDDIES: AvailableBuddy[] = [
     serviceArea: "เขตเทศบาลเมืองยะลา, ต.สะเตง",
     qualifications: ["BEDRIDDEN_CARE_TRAINING"],
     experience: "มีประสบการณ์ดูแลผู้สูงอายุและผู้ป่วยติดเตียง 5 ปี",
-    ratingText: "4.9 ★",
+    ratingText: "4.9 คะแนน",
     completedJobsCount: 42,
   },
   {
@@ -29,17 +29,17 @@ export const AVAILABLE_BUDDIES: AvailableBuddy[] = [
     serviceArea: "เขตเทศบาลเมืองยะลา, ต.บุดี",
     qualifications: ["BEDRIDDEN_CARE_TRAINING"],
     experience: "ผ่านการอบรมหลักสูตรดูแลผู้ป่วยติดเตียงของกระทรวงสาธารณสุข",
-    ratingText: "5.0 ★",
+    ratingText: "5.0 คะแนน",
     completedJobsCount: 38,
   },
   {
     id: "buddy-3",
     name: "คุณวีระ ยะลาจิตอาสา",
-    roleLabel: "Buddy จิตอาสาช่วยเดินทาง",
+    roleLabel: "ผู้ดูแลจิตอาสาช่วยเดินทาง",
     serviceArea: "เขตเมืองยะลา, ต.ท่าสาป",
     qualifications: [],
     experience: "ชำนาญเส้นทางโรงพยาบาลศูนย์ยะลาและคลินิกชุมชน",
-    ratingText: "4.8 ★",
+    ratingText: "4.8 คะแนน",
     completedJobsCount: 29,
   },
   {
@@ -49,7 +49,7 @@ export const AVAILABLE_BUDDIES: AvailableBuddy[] = [
     serviceArea: "ต.สะเตงนอก, เขตเทศบาลเมืองยะลา",
     qualifications: [],
     experience: "ช่วยเหลือผู้สูงอายุพาไปพบแพทย์เป็นประจำ 3 ปี",
-    ratingText: "4.9 ★",
+    ratingText: "4.9 คะแนน",
     completedJobsCount: 35,
   },
 ];
