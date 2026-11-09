@@ -1,13 +1,12 @@
 type PlaceholderPageProps = {
   title: string;
   description: string;
-  tone?: "user" | "buddy" | "admin";
+  tone?: "user" | "buddy";
 };
 
 const toneStyles = {
   user: "border-teal-200 bg-teal-50 text-teal-950",
   buddy: "border-blue-200 bg-blue-50 text-blue-950",
-  admin: "border-slate-200 bg-white text-slate-900",
 };
 
 export function PlaceholderPage({
@@ -22,7 +21,7 @@ export function PlaceholderPage({
       <p className="mt-4 max-w-2xl text-lg leading-8">{description}</p>
       <div className="mt-8 rounded-2xl border border-current/10 bg-white/70 p-5 text-base">
         {tone === "buddy"
-          ? "หน้านี้เป็นส่วนแสดงผลตัวอย่างสำหรับ อสม. บนระบบ Health Buddy กำลังอยู่ระหว่างการพัฒนาระบบข้อมูล"
+          ? "หน้านี้เป็นส่วนแสดงผลตัวอย่างสำหรับผู้ดูแล บนระบบ Health Buddy กำลังอยู่ระหว่างการพัฒนาระบบข้อมูล"
           : "หน้านี้เป็นโครงสร้างเริ่มต้นสำหรับ Health Buddy ยังไม่มีการเชื่อมต่อข้อมูลหรือการดำเนินการจริง"}
       </div>
     </section>

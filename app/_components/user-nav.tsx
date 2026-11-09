@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HealthBuddyLogo } from "@/app/_components/health-buddy-logo";
+import { NotificationBell } from "@/app/_components/notification-bell";
+import type { NotificationItem } from "@/lib/notifications/actions";
+import { signOut } from "@/lib/auth/sign-out";
 
 interface UserNavItem {
   href: string;
@@ -25,7 +28,7 @@ const userNavItems: UserNavItem[] = [
   },
   {
     href: "/booking",
-    label: "ขอความช่วยเหลือ",
+    label: "รับบริการ",
     icon: ({ className }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
@@ -57,19 +60,18 @@ const userNavItems: UserNavItem[] = [
     ),
   },
   {
-    href: "/follow-up",
-    label: "ติดตามผล",
+    href: "/profile",
+    label: "ข้อมูลส่วนตัว",
     icon: ({ className }) => (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <path d="m9 15 2 2 4-4" />
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
       </svg>
     ),
   },
 ];
 
-export function UserNav() {
+export function UserNav({profileId,notifications}:{profileId?:string;notifications?:NotificationItem[]}) {
   const pathname = usePathname();
 
   const isItemActive = (item: UserNavItem) => {
@@ -99,14 +101,17 @@ export function UserNav() {
           </div>
         </Link>
 
-        {/* Action Buttons: Role Switcher & Big Emergency Button */}
+        {/* Action Buttons: Sign out & Big Emergency Button */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <Link
-            className="flex min-h-12 items-center justify-center rounded-2xl border-2 border-teal-300 bg-teal-50/80 px-3.5 py-2 text-sm font-extrabold text-teal-950 transition hover:bg-teal-100 hover:border-teal-400 focus-visible:outline-3 focus-visible:outline-teal-700 active:scale-[0.98]"
-            href="/login"
-          >
-            สลับบทบาท
-          </Link>
+          {profileId ? <NotificationBell profileId={profileId} initial={notifications ?? []} /> : null}
+          <form action={signOut}>
+            <button
+              className="flex min-h-12 items-center justify-center rounded-2xl border-2 border-teal-300 bg-teal-50/80 px-3.5 py-2 text-sm font-extrabold text-teal-950 transition hover:bg-teal-100 hover:border-teal-400 focus-visible:outline-3 focus-visible:outline-teal-700 active:scale-[0.98]"
+              type="submit"
+            >
+              ออกจากระบบ
+            </button>
+          </form>
 
           <Link
             className="flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-base font-black text-white shadow-md shadow-red-700/20 transition hover:bg-red-700 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98] sm:px-5 sm:text-lg"

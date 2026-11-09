@@ -2,33 +2,52 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { getAcceptedJobDetails } from "@/app/_lib/accepted-job-details";
-import { myJobs, statusLabels, type MyJobStatus } from "@/app/_lib/my-jobs";
+import type { MyJobSummary } from "@/lib/buddy/assignments";
+import { SERVICE_LABELS, type ServiceType } from "@/app/_lib/services";
+
+export const JOB_STATUS_LABELS: Record<string, string> = {
+  ACCEPTED: "รับงานแล้ว",
+  ON_THE_WAY: "กำลังเดินทาง",
+  ARRIVED: "ถึงจุดรับแล้ว",
+  IN_PROGRESS: "กำลังช่วยเหลือ",
+  COMPLETED: "เสร็จสิ้น",
+};
+
+const STATUS_BADGE_CLASSES: Record<string, string> = {
+  ACCEPTED: "bg-indigo-50 text-indigo-800 border-indigo-300",
+  ON_THE_WAY: "bg-purple-50 text-purple-800 border-purple-300",
+  ARRIVED: "bg-cyan-50 text-cyan-800 border-cyan-300",
+  IN_PROGRESS: "bg-emerald-50 text-emerald-800 border-emerald-300",
+  COMPLETED: "bg-slate-100 text-slate-700 border-slate-300",
+};
 
 interface FilterTab {
   id: string;
   label: string;
-  statuses?: MyJobStatus[];
+  statuses?: string[];
 }
 
 const filterTabs: FilterTab[] = [
   { id: "all", label: "ทั้งหมด" },
-  { id: "in_progress", label: "กำลังดำเนินงาน", statuses: ["ON_THE_WAY", "ARRIVED", "IN_SERVICE"] },
-  { id: "accepted", label: "รับงานแล้ว", statuses: ["ACCEPTED"] },
+  {
+    id: "in_progress",
+    label: "กำลังดำเนินงาน",
+    statuses: ["ACCEPTED", "ON_THE_WAY", "ARRIVED", "IN_PROGRESS"],
+  },
   { id: "completed", label: "เสร็จสิ้น", statuses: ["COMPLETED"] },
 ];
 
-export function BuddyMyJobsView() {
+export function BuddyMyJobsView({ jobs }: { jobs: MyJobSummary[] }) {
   const [activeTab, setActiveTab] = useState("all");
 
   const currentTab = filterTabs.find((t) => t.id === activeTab);
   const visibleJobs = currentTab?.statuses
-    ? myJobs.filter((job) => currentTab.statuses?.includes(job.status))
-    : myJobs;
+    ? jobs.filter((job) => currentTab.statuses?.includes(job.requestStatus))
+    : jobs;
 
   const getCount = (tab: FilterTab) => {
-    if (!tab.statuses) return myJobs.length;
-    return myJobs.filter((job) => tab.statuses?.includes(job.status)).length;
+    if (!tab.statuses) return jobs.length;
+    return jobs.filter((job) => tab.statuses?.includes(job.requestStatus)).length;
   };
 
   return (
@@ -101,55 +120,46 @@ export function BuddyMyJobsView() {
       ) : (
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {visibleJobs.map((job) => {
-            const details = getAcceptedJobDetails(job.id);
-            if (!details) return null;
+            const badgeClass =
+              STATUS_BADGE_CLASSES[job.requestStatus] ??
+              "bg-slate-100 text-slate-700 border-slate-300";
+            const label = JOB_STATUS_LABELS[job.requestStatus] ?? job.requestStatus;
 
             return (
               <article
                 className="flex flex-col justify-between rounded-3xl border-2 border-blue-100 bg-white p-6 shadow-xs transition hover:border-blue-300 hover:shadow-md"
-                key={job.id}
+                key={job.requestId}
               >
                 <div>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className="font-mono text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        รหัสงาน {job.id}
-                      </span>
-                      <h2 className="mt-1 text-2xl font-black text-slate-950">{job.helpType}</h2>
+                      <h2 className="text-2xl font-black text-slate-950">
+                        {SERVICE_LABELS[job.serviceType as ServiceType] ?? job.serviceType}
+                      </h2>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-800">
-                      <span className="size-1.5 rounded-full bg-blue-600" aria-hidden="true" />
-                      {statusLabels[job.status]}
+                    <span
+                      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${badgeClass}`}
+                    >
+                      {label}
                     </span>
                   </div>
 
                   <p className="mt-3 text-base font-bold text-blue-900">
-                    {job.date}, {job.time}
+                    {job.serviceDate} · {job.startTime}
+                    {job.endTime ? ` - ${job.endTime}` : ""}
                   </p>
 
-                  <dl className="mt-4 space-y-2 text-sm text-slate-700">
-                    <div>
-                      <dt className="font-semibold text-slate-500">ผู้รับบริการ:</dt>
-                      <dd className="font-bold text-slate-900">{details.recipientName}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold text-slate-500">จุดรับ:</dt>
-                      <dd className="font-medium text-slate-800">{details.pickup}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold text-slate-500">จุดหมาย:</dt>
-                      <dd className="font-medium text-slate-800">{details.destination}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold text-slate-500">การเคลื่อนไหว:</dt>
-                      <dd className="font-medium text-slate-800">{details.mobilityRequirement}</dd>
-                    </div>
-                  </dl>
+                  <div className="mt-4 space-y-1 text-sm text-slate-700">
+                    <p>
+                      <span className="font-semibold text-slate-500">ผู้รับบริการ: </span>
+                      <span className="font-bold text-slate-900">{job.recipientName}</span>
+                    </p>
+                  </div>
                 </div>
 
                 <Link
                   className="mt-6 flex min-h-12 items-center justify-center rounded-xl bg-blue-700 px-5 text-base font-bold text-white transition hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-blue-700 active:scale-[0.98]"
-                  href={`/buddy/my-jobs/${job.id}`}
+                  href={`/buddy/my-jobs/${job.requestId}`}
                 >
                   เปิดขั้นตอนทำงาน →
                 </Link>
@@ -161,4 +171,3 @@ export function BuddyMyJobsView() {
     </section>
   );
 }
-

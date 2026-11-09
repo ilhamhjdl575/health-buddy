@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { getAcceptedJobDetails } from "@/app/_lib/accepted-job-details";
 import { statusLabels, type MyJob, type MyJobStatus } from "@/app/_lib/my-jobs";
+import { SERVICE_LABELS } from "@/app/_lib/services";
 
-const nextSteps: Record<Exclude<MyJobStatus, "COMPLETED">, { status: MyJobStatus; action: string }> = {
+const nextSteps: Partial<Record<MyJobStatus, { status: MyJobStatus; action: string }>> = {
   ACCEPTED: { status: "ON_THE_WAY", action: "เริ่มเดินทาง" },
   ON_THE_WAY: { status: "ARRIVED", action: "ถึงจุดรับแล้ว" },
-  ARRIVED: { status: "IN_SERVICE", action: "เริ่มให้ความช่วยเหลือ" },
+  ARRIVED: { status: "IN_PROGRESS", action: "เริ่มให้ความช่วยเหลือ" },
+  IN_PROGRESS: { status: "COMPLETED", action: "เสร็จสิ้นงาน" },
   IN_SERVICE: { status: "COMPLETED", action: "เสร็จสิ้นงาน" },
 };
 
@@ -27,7 +29,7 @@ export function MyJobDetailFlow({ job }: { job: MyJob }) {
       <p className="text-lg font-bold text-blue-800">รหัสงาน {job.id}</p>
       <h1 className="mt-2 text-3xl font-bold text-slate-950">รายละเอียดงานของฉัน</h1>
       <dl className="mt-7 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50 px-5 text-lg">
-        <div className="py-4"><dt className="font-semibold text-slate-600">ประเภทงาน</dt><dd className="mt-1 text-xl font-bold">{job.helpType}</dd></div>
+        <div className="py-4"><dt className="font-semibold text-slate-600">ประเภทงาน</dt><dd className="mt-1 text-xl font-bold">{SERVICE_LABELS[job.serviceType]}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">วันและเวลา</dt><dd className="mt-1 text-xl font-bold">{job.date}, {job.time}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">ชื่อผู้รับบริการ</dt><dd className="mt-1 text-xl font-bold">{details.recipientName}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">อายุ</dt><dd className="mt-1 text-xl font-bold">{details.age} ปี</dd></div>
@@ -56,7 +58,7 @@ export function MyJobDetailFlow({ job }: { job: MyJob }) {
         </section>
       ) : null}
 
-      {status === "COMPLETED" ? <section className="mt-7 rounded-2xl border-2 border-teal-200 bg-teal-50 p-5"><p className="text-xl font-bold text-teal-950">งานนี้เสร็จสิ้นแล้ว</p><p className="mt-2 text-lg text-slate-800">บันทึกการช่วยเหลือเรียบร้อยแล้ว ขอบคุณที่ร่วมดูแลผู้สูงอายุในชุมชน</p><Link className="mt-5 inline-flex min-h-14 items-center justify-center rounded-xl border-2 border-teal-700 bg-white px-5 text-lg font-bold text-teal-800 hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700" href="/buddy">กลับหน้าหลัก อสม.</Link></section> : null}
+      {status === "COMPLETED" ? <section className="mt-7 rounded-2xl border-2 border-teal-200 bg-teal-50 p-5"><p className="text-xl font-bold text-teal-950">งานนี้เสร็จสิ้นแล้ว</p><p className="mt-2 text-lg text-slate-800">บันทึกการช่วยเหลือเรียบร้อยแล้ว ขอบคุณที่ร่วมดูแลผู้สูงอายุในชุมชน</p><Link className="mt-5 inline-flex min-h-14 items-center justify-center rounded-xl border-2 border-teal-700 bg-white px-5 text-lg font-bold text-teal-800 hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-700" href="/buddy">กลับหน้าหลักผู้ดูแล</Link></section> : null}
 
       <Link className="mt-7 inline-flex min-h-14 items-center justify-center rounded-xl border-2 border-blue-700 bg-white px-6 text-lg font-bold text-blue-800 hover:bg-blue-50 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue-700" href="/buddy/my-jobs">กลับไปหน้ารวมงานของฉัน</Link>
     </section>

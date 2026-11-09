@@ -1,0 +1,4 @@
+"use server";
+import { createClient } from "@/lib/supabase/server";
+export type CompletedJob={requestId:string;serviceType:string;recipientName:string;serviceDate:string;completedAt:string|null;pickupAddress:string;followUpStatus:string|null};
+export async function getMyCompletedJobs():Promise<{success:true;jobs:CompletedJob[]}|{success:false;error:string}>{const s=await createClient();const{data,error}=await s.rpc("get_my_completed_jobs");if(error)return{success:false,error:"ไม่สามารถโหลดประวัติงานได้"};return{success:true,jobs:((data??[])as Array<{request_id:string;service_type:string;recipient_name:string;service_date:string;completed_at:string|null;pickup_address:string;follow_up_status:string|null}>).map(r=>({requestId:r.request_id,serviceType:r.service_type,recipientName:r.recipient_name,serviceDate:r.service_date,completedAt:r.completed_at,pickupAddress:r.pickup_address,followUpStatus:r.follow_up_status}))};}

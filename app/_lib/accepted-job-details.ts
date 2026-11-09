@@ -1,4 +1,5 @@
-export type AcceptedJobDetails = {
+/** Private recipient data. Show only after the Buddy has accepted the job. */
+export type AcceptedJobPrivateDetails = {
   recipientName: string;
   age: number;
   phone: string;
@@ -10,7 +11,7 @@ export type AcceptedJobDetails = {
   emergencyContactPhone: string;
 };
 
-const acceptedJobDetails: Record<string, AcceptedJobDetails> = {
+const acceptedJobDetails: Record<string, AcceptedJobPrivateDetails> = {
   "HB-001": {
     recipientName: "คุณสมชาย ใจดี",
     age: 72,
@@ -27,8 +28,8 @@ const acceptedJobDetails: Record<string, AcceptedJobDetails> = {
     age: 68,
     phone: "082-222-2222",
     pickup: "12 ซอยตัวอย่าง ตำบลสะเตง อำเภอเมืองยะลา",
-    destination: "คลินิกชุมชนสะเตง",
-    mobilityRequirement: "ใช้รถเข็น",
+    destination: "บ้านผู้รับบริการ (ให้บริการที่บ้าน)",
+    mobilityRequirement: "ผู้ป่วยติดเตียง ต้องช่วยเปลี่ยนท่า",
     emergencyContactName: "คุณวิชัย",
     emergencyContactRelation: "บุตรชาย",
     emergencyContactPhone: "082-999-9999",
@@ -49,8 +50,8 @@ const acceptedJobDetails: Record<string, AcceptedJobDetails> = {
     age: 70,
     phone: "084-444-4444",
     pickup: "7 ถนนประชาสงเคราะห์ ตำบลสะเตง อำเภอเมืองยะลา",
-    destination: "ที่ว่าการอำเภอเมืองยะลา",
-    mobilityRequirement: "ไม่สะดวกใช้บันได",
+    destination: "บ้านผู้รับบริการ (ให้บริการที่บ้าน)",
+    mobilityRequirement: "ผู้ป่วยติดเตียง ต้องดูแลกิจวัตรพื้นฐาน",
     emergencyContactName: "คุณฟาตีมะห์",
     emergencyContactRelation: "ภรรยา",
     emergencyContactPhone: "084-999-9999",

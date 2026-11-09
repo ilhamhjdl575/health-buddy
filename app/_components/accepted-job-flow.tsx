@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { getAcceptedJobDetails } from "@/app/_lib/accepted-job-details";
-import type { OpenJob } from "@/app/_lib/open-jobs";
+import type { PublicOpenJob } from "@/app/_lib/open-jobs";
+import { QUALIFICATION_LABELS, SERVICE_LABELS } from "@/app/_lib/services";
 
-export function AcceptedJobFlow({ job }: { job: OpenJob }) {
+export function AcceptedJobFlow({ job }: { job: PublicOpenJob }) {
   const [accepted, setAccepted] = useState(false);
   const [skipped, setSkipped] = useState(false);
   const privateDetails = accepted ? getAcceptedJobDetails(job.id) : undefined;
@@ -17,17 +18,23 @@ export function AcceptedJobFlow({ job }: { job: OpenJob }) {
       <p className="mt-3 text-lg leading-8 text-slate-700">ข้อมูลสำหรับช่วยตัดสินใจรับงานเท่านั้น</p>
 
       <dl className="mt-7 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50 px-5 text-lg">
-        <div className="py-4"><dt className="font-semibold text-slate-600">ประเภทความช่วยเหลือ</dt><dd className="mt-1 text-xl font-bold">{job.helpType}</dd></div>
+        <div className="py-4"><dt className="font-semibold text-slate-600">ประเภทความช่วยเหลือ</dt><dd className="mt-1 text-xl font-bold">{SERVICE_LABELS[job.serviceType]}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">วันที่</dt><dd className="mt-1 text-xl font-bold">{job.date}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">เวลา</dt><dd className="mt-1 text-xl font-bold">{job.time}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">พื้นที่โดยประมาณ</dt><dd className="mt-1 text-xl font-bold">{job.area}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">ระยะทางโดยประมาณ</dt><dd className="mt-1 text-xl font-bold">{job.distance}</dd></div>
         <div className="py-4"><dt className="font-semibold text-slate-600">การเดินและการเคลื่อนไหว</dt><dd className="mt-1 text-xl font-bold">{job.mobilityRequirement}</dd></div>
+        {job.requiredQualification ? <div className="py-4"><dt className="font-semibold text-slate-600">คุณสมบัติผู้ดูแลที่จำเป็น</dt><dd className="mt-1 text-xl font-bold text-amber-900">{QUALIFICATION_LABELS[job.requiredQualification]}</dd></div> : null}
         <div className="py-4"><dt className="font-semibold text-slate-600">สถานะงาน</dt><dd className="mt-1 text-xl font-bold">{accepted ? "รับงานแล้ว" : "เปิดรับงาน"}</dd></div>
       </dl>
 
       {!accepted ? (
         <div className="mt-7">
+          {job.requiredQualification ? (
+            <p className="mb-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 text-base font-bold leading-6 text-amber-950">
+              งานนี้จะแสดงและเปิดให้รับเฉพาะผู้ดูแลที่ระบบตรวจสอบแล้วว่า “{QUALIFICATION_LABELS[job.requiredQualification]}”
+            </p>
+          ) : null}
           <p className="text-lg font-semibold text-slate-800">เมื่อกดรับงานแล้ว จะแสดงข้อมูลและเบอร์โทรติดต่อผู้รับบริการ</p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
             <button className="min-h-16 rounded-2xl bg-blue-700 px-7 text-xl font-bold text-white shadow-sm hover:bg-blue-800 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-blue-800" onClick={() => { setAccepted(true); setSkipped(false); }} type="button">กดรับงานนี้</button>

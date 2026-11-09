@@ -1,0 +1,4 @@
+# Supabase Project Configuration for Health Buddy
+
+[functions.send-sms]
+verify_jwt = false

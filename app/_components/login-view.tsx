@@ -1,22 +1,144 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { HealthBuddyLogo } from "@/app/_components/health-buddy-logo";
+import { signInWithGoogle } from "@/lib/auth/sign-in-google";
+import { sendPhoneOtp } from "@/lib/auth/send-phone-otp";
+import { verifyPhoneOtp } from "@/lib/auth/verify-phone-otp";
 
-type ModalType = "line-mock" | "phone-mock" | "google-mock" | "register-mock" | null;
+type PhoneStage = "IDLE" | "PHONE_INPUT" | "OTP_INPUT";
 
 export function LoginView() {
-  const [modal, setModal] = useState<ModalType>(null);
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
 
-  const closeModal = () => setModal(null);
+  // Google OAuth state
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  // Phone OTP states
+  const [phoneStage, setPhoneStage] = useState<PhoneStage>("IDLE");
+  const [phone, setPhone] = useState("");
+  const [displayPhone, setDisplayPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  // Error state
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    urlError ? "ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่อีกครั้ง" : null,
+  );
+
+  // Cooldown countdown timer for resend OTP
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  // Handle Google OAuth
+  const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
+    setErrorMessage(null);
+
+    const result = await signInWithGoogle();
+    if (result.error) {
+      setIsGoogleLoading(false);
+      setErrorMessage("ไม่สามารถเข้าสู่ระบบด้วย Google ได้ กรุณาลองใหม่อีกครั้ง");
+    }
+  };
+
+  // Handle Send OTP (Stage 1)
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setIsSendingOtp(true);
+
+    const result = await sendPhoneOtp(phone);
+    setIsSendingOtp(false);
+
+    if (!result.success) {
+      setErrorMessage(result.error);
+      return;
+    }
+
+    setDisplayPhone(result.display);
+    setPhoneStage("OTP_INPUT");
+    setCooldown(60);
+  };
+
+  // Handle Resend OTP
+  const handleResendOtp = async () => {
+    if (cooldown > 0 || isSendingOtp) return;
+    setErrorMessage(null);
+    setIsSendingOtp(true);
+
+    const result = await sendPhoneOtp(phone);
+    setIsSendingOtp(false);
+
+    if (!result.success) {
+      setErrorMessage(result.error);
+      return;
+    }
+
+    setDisplayPhone(result.display);
+    setCooldown(60);
+  };
+
+  // Handle Verify OTP (Stage 2)
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setIsVerifyingOtp(true);
+
+    const result = await verifyPhoneOtp(phone, otp);
+    if (!result.success) {
+      setIsVerifyingOtp(false);
+      setErrorMessage(result.error);
+      return;
+    }
+
+    // Full page navigation ensures session cookies are recognized by proxy and server components
+    window.location.href = result.destination;
+  };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-teal-50 via-white to-slate-100 px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-md space-y-7">
+    <div className="min-h-screen bg-linear-to-b from-teal-50 via-white to-slate-100 px-4 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto max-w-md space-y-6">
+        {/* Top Back Action Bar */}
+        <div className="flex items-center justify-between">
+          <Link
+            href="/"
+            className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3.5 py-1.5 text-sm font-bold text-slate-700 shadow-2xs backdrop-blur-xs transition hover:border-teal-300 hover:bg-teal-50/80 hover:text-teal-950 focus-visible:outline-2 focus-visible:outline-teal-700 active:scale-95"
+            aria-label="ย้อนกลับไปหน้าแรก (Splash)"
+          >
+            <svg
+              className="size-4 shrink-0 transition-transform group-hover:-translate-x-0.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>ย้อนกลับหน้าแรก</span>
+          </Link>
+
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            Health Buddy
+          </span>
+        </div>
+
         {/* Top Header / Branding */}
         <div className="flex flex-col items-center text-center">
-          <Link href="/splash" className="focus-visible:outline-2 focus-visible:outline-teal-700 rounded-2xl">
+          <Link href="/" className="focus-visible:outline-2 focus-visible:outline-teal-700 rounded-2xl">
             <HealthBuddyLogo className="size-20" />
           </Link>
 
@@ -29,262 +151,223 @@ export function LoginView() {
           </p>
         </div>
 
-        {/* Primary Login Option: LINE */}
-        <section aria-labelledby="primary-login-heading" className="space-y-3">
-          <h2 id="primary-login-heading" className="sr-only">
-            ช่องทางเข้าสู่ระบบหลัก
-          </h2>
-
-          <button
-            type="button"
-            onClick={() => setModal("line-mock")}
-            className="flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl bg-[#06C755] px-6 text-xl font-bold text-white shadow-md shadow-emerald-900/15 transition hover:bg-[#05b34c] focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#06C755] active:scale-[0.99]"
+        {/* Error Notification Banner */}
+        {errorMessage ? (
+          <div
+            role="alert"
+            className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-center text-sm font-semibold text-rose-900 shadow-2xs"
           >
-            {/* LINE Chat Bubble Icon */}
-            <svg
-              className="size-7 shrink-0 fill-current"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path d="M12 2C6.48 2 2 5.92 2 10.75c0 2.94 1.66 5.56 4.25 7.15-.19.68-.78 2.5-1.07 3.45-.16.51.19.78.53.56.27-.18 2.87-1.92 4.05-2.73.73.11 1.48.17 2.24.17 5.52 0 10-3.92 10-8.75S17.52 2 12 2zm1.75 11.2h-3.5a.75.75 0 0 1 0-1.5h2.75V7.75a.75.75 0 0 1 1.5 0v4.7c0 .41-.34.75-.75.75z" />
-            </svg>
-            <span>เข้าสู่ระบบด้วย LINE</span>
-          </button>
-
-          <p className="text-center text-sm font-semibold text-teal-900">
-            ช่องทางแนะนำสำหรับผู้สูงอายุและ อสม. (สะดวก ไม่ต้องจำรหัสผ่าน)
-          </p>
-        </section>
-
-        {/* Development Role Selector (Required by Rule #3) */}
-        <section
-          aria-labelledby="dev-role-heading"
-          className="rounded-3xl border-2 border-dashed border-amber-400 bg-amber-50/70 p-5 sm:p-6"
-        >
-          <div className="flex items-center gap-2 text-amber-900">
-            <span className="rounded-md bg-amber-200 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-amber-900">
-              สำหรับการทดสอบระบบเท่านั้น
-            </span>
+            {errorMessage}
           </div>
+        ) : null}
 
-          <h2 id="dev-role-heading" className="mt-2 text-xl font-bold text-slate-950">
-            ทดลองใช้งานในบทบาท (Mock Role)
-          </h2>
-          <p className="mt-1 text-sm text-slate-700">
-            เลือกบทบาทเพื่อเข้าสู่หน้าจอทำงานของกลุ่มผู้ใช้แต่ละประเภท:
-          </p>
+        {/* Authentication Card */}
+        <section aria-labelledby="primary-login-heading" className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
+          {phoneStage === "IDLE" && (
+            <div className="space-y-4">
+              <h2 id="primary-login-heading" className="text-center text-lg font-bold text-slate-800">
+                เลือกช่องทางเข้าสู่ระบบ
+              </h2>
 
-          <div className="mt-4 grid gap-2.5">
-            {/* Role 1: User */}
-            <Link
-              href="/user"
-              className="flex min-h-14 items-center justify-between rounded-2xl border-2 border-teal-300 bg-white px-4 py-3 shadow-xs transition hover:border-teal-600 hover:bg-teal-50 focus-visible:outline-3 focus-visible:outline-teal-700"
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-800" aria-hidden="true">
-                  <svg className="size-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              <div className="grid gap-3">
+                {/* Button to open Phone OTP flow */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMessage(null);
+                    setPhoneStage("PHONE_INPUT");
+                  }}
+                  className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-teal-700 px-6 text-lg font-bold text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-teal-700 active:scale-[0.99]"
+                >
+                  <svg className="size-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                   </svg>
-                </span>
-                <div className="text-left">
-                  <p className="text-lg font-bold text-slate-950">ผู้รับบริการ (USER)</p>
-                  <p className="text-xs text-slate-600">ผู้สูงอายุ / ผู้ขอความช่วยเหลือ</p>
+                  <span>เข้าสู่ระบบด้วยเบอร์โทรศัพท์</span>
+                </button>
+
+                {/* Google OAuth Live Trigger */}
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isGoogleLoading}
+                  className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-slate-300 bg-white px-6 text-lg font-bold text-slate-800 shadow-xs transition hover:bg-slate-50 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-slate-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isGoogleLoading ? (
+                    <span className="inline-flex items-center gap-2 text-base font-semibold text-slate-600">
+                      <svg className="size-5 animate-spin text-teal-700" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      กำลังเชื่อมต่อ Google...
+                    </span>
+                  ) : (
+                    <>
+                      <svg className="size-6 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.15z" />
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.26 21.36 7.33 24 12 24z" />
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z" />
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
+                      </svg>
+                      <span>เข้าสู่ระบบด้วย Google</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Stage 1: Phone Input Form */}
+          {phoneStage === "PHONE_INPUT" && (
+            <form onSubmit={handleSendOtp} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 id="primary-login-heading" className="text-xl font-bold text-slate-900">
+                  เข้าสู่ระบบด้วยเบอร์โทรศัพท์
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setErrorMessage(null);
+                    setPhoneStage("IDLE");
+                  }}
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline"
+                >
+                  ย้อนกลับ
+                </button>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="phone-input" className="block text-sm font-semibold text-slate-700">
+                  หมายเลขโทรศัพท์มือถือ (ไทย)
+                </label>
+                <input
+                  id="phone-input"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  required
+                  placeholder="เช่น 0812345678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full rounded-2xl border-2 border-slate-300 px-4 py-3 text-lg font-medium text-slate-950 placeholder-slate-400 focus:border-teal-600 focus:outline-none"
+                />
+                <p className="text-xs text-slate-500">
+                  กรอกเบอร์โทรศัพท์ 10 หลัก ระบบจะแปลงเป็น +66 อัตโนมัติเพื่อส่งรหัส OTP ทาง SMS
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSendingOtp}
+                className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 px-6 text-lg font-bold text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-teal-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSendingOtp ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="size-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                    กำลังส่งรหัส OTP...
+                  </span>
+                ) : (
+                  <span>ส่งรหัส OTP</span>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* Stage 2: OTP Verification Form */}
+          {phoneStage === "OTP_INPUT" && (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div>
+                <h2 id="primary-login-heading" className="text-xl font-bold text-slate-900">
+                  ยืนยันรหัส OTP
+                </h2>
+                <div className="mt-1 flex items-center justify-between text-sm text-slate-600">
+                  <span>ส่งรหัสไปยัง <strong className="text-slate-900">{displayPhone}</strong></span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtp("");
+                      setErrorMessage(null);
+                      setPhoneStage("PHONE_INPUT");
+                    }}
+                    className="text-xs font-bold text-teal-800 hover:text-teal-950 underline"
+                  >
+                    แก้ไขเบอร์
+                  </button>
                 </div>
               </div>
-              <span className="text-sm font-bold text-teal-800">เข้าสู่ระบบ →</span>
-            </Link>
 
-            {/* Role 2: Buddy */}
-            <Link
-              href="/buddy"
-              className="flex min-h-14 items-center justify-between rounded-2xl border-2 border-blue-300 bg-white px-4 py-3 shadow-xs transition hover:border-blue-600 hover:bg-blue-50 focus-visible:outline-3 focus-visible:outline-blue-700"
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-800" aria-hidden="true">
-                  <svg className="size-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/>
-                  </svg>
-                </span>
-                <div className="text-left">
-                  <p className="text-lg font-bold text-slate-950">อสม. (BUDDY)</p>
-                  <p className="text-xs text-slate-600">อาสาสมัครสาธารณสุขชุมชน</p>
-                </div>
+              <div className="space-y-1.5">
+                <label htmlFor="otp-input" className="block text-sm font-semibold text-slate-700">
+                  รหัส OTP 6 หลัก
+                </label>
+                <input
+                  id="otp-input"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  autoComplete="one-time-code"
+                  required
+                  placeholder="• • • • • •"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ""))}
+                  className="w-full tracking-widest text-center rounded-2xl border-2 border-slate-300 px-4 py-3 text-2xl font-bold text-slate-950 placeholder-slate-300 focus:border-teal-600 focus:outline-none"
+                />
               </div>
-              <span className="text-sm font-bold text-blue-800">เข้าสู่ระบบ →</span>
-            </Link>
 
-            {/* Role 3: Admin */}
-            <Link
-              href="/admin"
-              className="flex min-h-14 items-center justify-between rounded-2xl border-2 border-slate-300 bg-white px-4 py-3 shadow-xs transition hover:border-slate-600 hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-slate-800"
-            >
-              <div className="flex items-center gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-slate-200 text-slate-800" aria-hidden="true">
-                  <svg className="size-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                  </svg>
-                </span>
-                <div className="text-left">
-                  <p className="text-lg font-bold text-slate-950">ผู้ดูแลระบบ (ADMIN)</p>
-                  <p className="text-xs text-slate-600">เจ้าหน้าที่และผู้ประสานงานกลาง</p>
-                </div>
+              <button
+                type="submit"
+                disabled={isVerifyingOtp || otp.length < 4}
+                className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 px-6 text-lg font-bold text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-teal-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isVerifyingOtp ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="size-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                    </svg>
+                    กำลังยืนยันรหัส...
+                  </span>
+                ) : (
+                  <span>ยืนยันรหัส OTP</span>
+                )}
+              </button>
+
+              <div className="pt-2 text-center">
+                {cooldown > 0 ? (
+                  <span className="text-sm font-medium text-slate-500">
+                    ส่งรหัสอีกครั้งได้ในอีก ({cooldown} วินาที)
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={isSendingOtp}
+                    className="text-sm font-bold text-teal-800 underline underline-offset-4 hover:text-teal-950"
+                  >
+                    {isSendingOtp ? "กำลังส่งรหัสใหม่..." : "ส่งรหัสอีกครั้ง"}
+                  </button>
+                )}
               </div>
-              <span className="text-sm font-bold text-slate-800">เข้าสู่ระบบ →</span>
-            </Link>
-          </div>
+            </form>
+          )}
         </section>
 
-        {/* Additional Login Options (Required by Rule #4) */}
-        <section aria-labelledby="other-login-heading" className="space-y-3">
-          <div className="relative flex items-center justify-center">
-            <div className="w-full border-t border-slate-300" />
-            <span className="absolute bg-white px-3 text-sm font-semibold text-slate-500">
-              หรือเข้าสู่ระบบด้วย
-            </span>
-          </div>
-
-          <div className="grid gap-2.5 pt-2">
-            {/* Phone Login Mock */}
-            <button
-              type="button"
-              onClick={() => setModal("phone-mock")}
-              className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-slate-300 bg-white px-5 text-lg font-bold text-slate-800 shadow-xs hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-slate-700"
-            >
-              <svg className="size-5 fill-current text-slate-700" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-              </svg>
-              <span>เข้าสู่ระบบด้วยเบอร์โทร</span>
-            </button>
-
-            {/* Google Login Mock */}
-            <button
-              type="button"
-              onClick={() => setModal("google-mock")}
-              className="flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl border-2 border-slate-300 bg-white px-5 text-lg font-bold text-slate-800 shadow-xs hover:bg-slate-50 focus-visible:outline-3 focus-visible:outline-slate-700"
-            >
-              {/* Google G Icon */}
-              <svg className="size-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  fill="#4285F4"
-                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.15z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.26 21.36 7.33 24 12 24z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.94 0 12s.46 3.84 1.26 5.42l4.02-3.15z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                />
-              </svg>
-              <span>เข้าสู่ระบบด้วย Google</span>
-            </button>
-          </div>
-
-          <p className="text-center text-xs text-slate-500">
-            ช่องทางเพิ่มเติม — อยู่ระหว่างพัฒนา (Authentication หลักคือ LINE)
-          </p>
-        </section>
-
-        {/* Register / Sign Up Section (Required by Rule #5) */}
+        {/* Register / Sign Up Section */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
           <p className="text-base text-slate-700">
             ยังไม่มีบัญชีใช้งานในระบบ?{" "}
-            <button
-              type="button"
-              onClick={() => setModal("register-mock")}
+            <Link
+              href="/signup"
               className="font-bold text-teal-800 underline underline-offset-4 hover:text-teal-950 focus-visible:outline-2 focus-visible:outline-teal-700"
             >
               สมัครสมาชิก
-            </button>
+            </Link>
           </p>
         </div>
-
-        {/* Navigation to Splash */}
-        <div className="text-center pt-2">
-          <Link href="/" className="text-sm font-semibold text-slate-500 hover:text-slate-900">
-            ← ย้อนกลับไปหน้าเปิด (Splash)
-          </Link>
-        </div>
       </div>
-
-      {/* Modal Dialog for Mock Actions */}
-      {modal ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
-        >
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-8 space-y-4">
-            {modal === "line-mock" && (
-              <>
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800" aria-hidden="true">
-                  <svg className="size-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                  </svg>
-                </div>
-                <h3 id="modal-title" className="text-2xl font-bold text-slate-950">
-                  จำลองการเข้าสู่ระบบด้วย LINE
-                </h3>
-                <p className="text-base leading-relaxed text-slate-700">
-                  ในเวอร์ชันจริง ระบบจะเชื่อมต่อกับ <strong>LINE LIFF / LINE Login</strong> เพื่อระบุตัวตนของผู้สูงอายุและ อสม. โดยไม่ต้องกรอกรหัสผ่าน
-                </p>
-                <div className="rounded-2xl bg-slate-50 p-4 text-sm font-semibold text-slate-800">
-                  สำหรับการทดสอบในขั้นตอนนี้ กรุณาเลือกบทบาทที่ต้องการจากส่วน <strong>&quot;ทดลองใช้งานในบทบาท&quot;</strong> บนหน้าจอ
-                </div>
-              </>
-            )}
-
-            {(modal === "phone-mock" || modal === "google-mock") && (
-              <>
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-800" aria-hidden="true">
-                  <svg className="size-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                  </svg>
-                </div>
-                <h3 id="modal-title" className="text-2xl font-bold text-slate-950">
-                  ช่องทางเพิ่มเติม — อยู่ระหว่างพัฒนา
-                </h3>
-                <p className="text-base leading-relaxed text-slate-700">
-                  ช่องทางนี้จัดทำขึ้นเพื่อแสดงแนวทาง UI ตามต้นแบบ ทั้งนี้ Authentication หลักสำหรับผู้รับบริการและ อสม. คือ <strong>LINE Login</strong> เพื่อความง่ายในการใช้งาน
-                </p>
-              </>
-            )}
-
-            {modal === "register-mock" && (
-              <>
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-teal-100 text-teal-800" aria-hidden="true">
-                  <svg className="size-6 fill-current" viewBox="0 0 24 24">
-                    <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                  </svg>
-                </div>
-                <h3 id="modal-title" className="text-2xl font-bold text-slate-950">
-                  การสมัครสมาชิก Health Buddy
-                </h3>
-                <p className="text-base leading-relaxed text-slate-700">
-                  การลงทะเบียนผู้ใช้งานจะเชื่อมกับระบบยืนยันตัวตนในขั้นตอนถัดไป (ปัจจุบันอยู่ในระยะ Frontend Mock)
-                </p>
-              </>
-            )}
-
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="min-h-14 w-full rounded-2xl bg-slate-900 px-6 text-lg font-bold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-slate-800"
-              >
-                เข้าใจแล้ว / ปิดหน้าต่าง
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
-

@@ -31,7 +31,7 @@ export function SplashScreen() {
         {/* Subtitle explaining the system clearly for elders and families */}
         <p className="mt-4 text-lg leading-relaxed text-slate-700 sm:text-xl">
           แอปพลิเคชันเพื่อการดูแลสุขภาพผู้สูงอายุในชุมชน
-          เชื่อมต่อคุณกับ อสม. ใกล้บ้านอย่างอบอุ่นและปลอดภัย
+          เชื่อมต่อคุณกับผู้ดูแลใกล้บ้านอย่างอบอุ่นและปลอดภัย
         </p>
 
         {/* Key Community Highlights */}
@@ -43,8 +43,8 @@ export function SplashScreen() {
               </svg>
             </span>
             <div>
-              <p className="text-lg font-bold text-slate-900">อสม. คนคุ้นเคย</p>
-              <p className="text-base text-slate-600">พร้อมช่วยเหลือ เดินทาง นำทาง และช่วยประสานงาน</p>
+              <p className="text-lg font-bold text-slate-900">ผู้ดูแลคนคุ้นเคย</p>
+              <p className="text-base text-slate-600">พาไปพบแพทย์ และดูแลผู้ป่วยติดเตียงโดยผู้ผ่านการอบรม</p>
             </div>
           </div>
 
@@ -55,8 +55,8 @@ export function SplashScreen() {
               </svg>
             </span>
             <div>
-              <p className="text-lg font-bold text-slate-900">ใช้ง่าย ไม่ต้องจำรหัส</p>
-              <p className="text-base text-slate-600">เข้าใช้งานสะดวกผ่าน LINE เหมาะสำหรับทุกวัย</p>
+              <p className="text-lg font-bold text-slate-900">เข้าถึงง่าย ปลอดภัย</p>
+              <p className="text-base text-slate-600">เข้าใช้งานสะดวกด้วยเบอร์โทรศัพท์หรือ Google เหมาะสำหรับทุกวัย</p>
             </div>
           </div>
         </div>

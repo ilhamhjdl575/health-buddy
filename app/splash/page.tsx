@@ -1,6 +1,6 @@
-import { SplashScreen } from "@/app/_components/splash-screen";
+import { permanentRedirect } from "next/navigation";
 
 export default function SplashPage() {
-  return <SplashScreen />;
+  permanentRedirect("/");
 }
 

@@ -1,37 +1,57 @@
-import { Suspense } from "react";
+import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import { MyJobDetailFlow } from "@/app/_components/my-job-detail-flow";
-import { getMyJob } from "@/app/_lib/my-jobs";
+import { Suspense } from "react";
+import { getPrivateJob, getJobStatusHistory } from "@/lib/buddy/assignments";
+import { BuddyJobDetailView } from "@/app/_components/buddy-job-detail-view";
+import { RealtimeRefresh } from "@/app/_components/realtime-refresh";
 
-async function MyJobDetailContent({
-  params,
-}: {
-  params: PageProps<"/buddy/my-jobs/[jobId]">["params"];
-}) {
+export const instant = false;
+
+async function Detail({ params }: { params: Promise<{ jobId: string }> }) {
+  await connection();
   const { jobId } = await params;
-  const job = getMyJob(jobId);
+  const [job, history] = await Promise.all([
+    getPrivateJob(jobId),
+    getJobStatusHistory(jobId),
+  ]);
 
-  if (!job) {
-    notFound();
-  }
+  if (!job) notFound();
 
-  return <MyJobDetailFlow job={job} />;
+  return (
+    <>
+      <RealtimeRefresh
+        channel={`job-detail:${jobId}`}
+        table="job_status_history"
+        filter={`service_request_id=eq.${jobId}`}
+        event="INSERT"
+      />
+      <BuddyJobDetailView
+        key={`${job.request_status}:${history.length}`}
+        job={{
+          requestId: jobId,
+          recipientName: job.recipient_name,
+          recipientPhone: job.recipient_phone,
+          serviceType: job.service_type,
+          serviceDate: job.service_date,
+          startTime: job.start_time,
+          endTime: job.end_time,
+          pickupAddress: job.pickup_address,
+          destinationAddress: job.destination_address,
+          requestStatus: job.request_status,
+          mobilitySummary: job.mobility_summary ?? [],
+          emergencyName: job.emergency_name,
+          emergencyPhone: job.emergency_phone,
+        }}
+        initialHistory={history}
+      />
+    </>
+  );
 }
 
-export default function MyJobDetailPage({
-  params,
-}: PageProps<"/buddy/my-jobs/[jobId]">) {
+export default function Page({ params }: { params: Promise<{ jobId: string }> }) {
   return (
-    <Suspense
-      fallback={
-        <section className="mx-auto max-w-3xl animate-pulse rounded-3xl border-2 border-slate-100 bg-white p-6 shadow-sm sm:p-8">
-          <div className="h-6 w-32 rounded-lg bg-slate-200" />
-          <div className="mt-3 h-9 w-64 rounded-lg bg-slate-200" />
-          <div className="mt-7 h-80 rounded-2xl bg-slate-100" />
-        </section>
-      }
-    >
-      <MyJobDetailContent params={params} />
+    <Suspense fallback={<p className="p-4 text-slate-600">กำลังโหลดรายละเอียดงาน...</p>}>
+      <Detail params={params} />
     </Suspense>
   );
 }

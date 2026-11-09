@@ -2,7 +2,7 @@ import type { SVGProps } from "react";
 
 /**
  * 1. ไอคอนรถเข็น (Wheelchair)
- * สัญลักษณ์สากลเข้าใจง่ายสำหรับผู้สูงอายุและ อสม.
+ * สัญลักษณ์สากลเข้าใจง่ายสำหรับผู้สูงอายุและผู้ดูแล
  */
 export function WheelchairIcon({ className, style, ...props }: SVGProps<SVGSVGElement>) {
   return (
@@ -103,7 +103,7 @@ export function WalkerIcon({ className, style, ...props }: SVGProps<SVGSVGElemen
 
 /**
  * 4. ไอคอนคนช่วยพยุงเดิน (Walking Assistant)
- * อสม./ผู้ดูแล ช่วยประคองแขนเดินเคียงข้างผู้สูงอายุ
+ * ผู้ดูแล ช่วยประคองแขนเดินเคียงข้างผู้สูงอายุ
  */
 export function WalkingAssistantIcon({ className, style, ...props }: SVGProps<SVGSVGElement>) {
   return (
@@ -118,7 +118,7 @@ export function WalkingAssistantIcon({ className, style, ...props }: SVGProps<SV
       style={{ display: "inline-block", width: "1em", height: "1em", verticalAlign: "-0.125em", ...style }}
       {...props}
     >
-      {/* อสม. / ผู้ดูแล (ซ้าย) */}
+      {/* ผู้ดูแล (ซ้าย) */}
       <circle cx="7" cy="4" r="2" />
       <path d="M4.5 21v-6l2.5-3.5L9.5 14v7" />
       {/* ผู้สูงอายุ (ขวา) */}
@@ -155,6 +155,29 @@ export function AvoidStairsIcon({ className, style, ...props }: SVGProps<SVGSVGE
       <circle cx="17.5" cy="4.5" r="3.2" className="stroke-amber-600 fill-amber-100" strokeWidth="1.8" />
       <path d="M17.5 3v2" className="stroke-amber-800" strokeWidth="2" />
       <circle cx="17.5" cy="6.2" r="0.6" className="fill-amber-800" />
+    </svg>
+  );
+}
+
+/** ไอคอนผู้ป่วยติดเตียง */
+export function BedriddenIcon({ className, style, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      style={{ display: "inline-block", width: "1em", height: "1em", verticalAlign: "-0.125em", ...style }}
+      {...props}
+    >
+      <path d="M3 5v15" />
+      <path d="M3 16h18v4" />
+      <path d="M6 12h12a3 3 0 0 1 3 3v1H6z" />
+      <circle cx="8" cy="9" r="2.5" />
+      <path d="M10.5 10.5 15 12" />
     </svg>
   );
 }

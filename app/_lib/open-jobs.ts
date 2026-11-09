@@ -1,18 +1,22 @@
-export type OpenJob = {
+import type { QualificationType, ServiceType } from "@/app/_lib/services";
+
+/** Safe to show before a Buddy accepts a job. No name, phone, or exact address. */
+export type PublicOpenJob = {
   id: string;
-  helpType: string;
+  serviceType: ServiceType;
   date: string;
   time: string;
   area: string;
   distance: string;
   mobilityRequirement: string;
+  requiredQualification?: QualificationType;
   status: "OPEN";
 };
 
-export const openJobs: OpenJob[] = [
+export const openJobs: PublicOpenJob[] = [
   {
     id: "HB-001",
-    helpType: "เดินทาง",
+    serviceType: "DOCTOR_VISIT",
     date: "10 พ.ย. 2026",
     time: "08:00–09:00",
     area: "เขตเทศบาลเมืองยะลา",
@@ -22,17 +26,18 @@ export const openJobs: OpenJob[] = [
   },
   {
     id: "HB-002",
-    helpType: "นัดหมาย",
+    serviceType: "BEDRIDDEN_CARE",
     date: "10 พ.ย. 2026",
     time: "10:30–11:30",
     area: "ตำบลสะเตง",
     distance: "2.4 กม.",
     mobilityRequirement: "ใช้รถเข็น",
+    requiredQualification: "BEDRIDDEN_CARE_TRAINING",
     status: "OPEN",
   },
   {
     id: "HB-003",
-    helpType: "ช่วยสื่อสาร",
+    serviceType: "DOCTOR_VISIT",
     date: "11 พ.ย. 2026",
     time: "09:00–10:00",
     area: "เขตเมืองยะลา",
