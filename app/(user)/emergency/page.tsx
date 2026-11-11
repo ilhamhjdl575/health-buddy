@@ -2,12 +2,13 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { getEmergencyInfo } from "@/lib/emergency/actions";
 import { EmergencyContactsView } from "@/app/_components/emergency-contacts-view";
+import { getLocalCoordinatorForUser } from "@/lib/coordinator/data";
 
 export const instant = false;
 
 export default async function EmergencyPage() {
   await connection();
-  const info = await getEmergencyInfo();
+  const [info, coordinator] = await Promise.all([getEmergencyInfo(), getLocalCoordinatorForUser()]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -71,9 +72,16 @@ export default async function EmergencyPage() {
         <h2 className="text-2xl font-bold text-teal-950" id="coordinator-title">
           ผู้ประสานงานในพื้นที่
         </h2>
-        <p className="mt-2 text-base leading-7 text-slate-800">
-          ทีม Health Buddy และ อสม. ในพื้นที่พร้อมช่วยประสานงานต่อเนื่องหลังแจ้งหน่วยแพทย์ฉุกเฉินแล้ว
-        </p>
+        {coordinator ? (
+          <dl className="mt-5 grid gap-4 text-lg sm:grid-cols-2">
+            <div><dt className="text-sm font-bold text-teal-800">ชื่อ รพ.สต.</dt><dd className="mt-1 font-bold text-slate-950">{coordinator.healthCenterName}</dd></div>
+            <div><dt className="text-sm font-bold text-teal-800">ชื่อ - นามสกุล</dt><dd className="mt-1 font-bold text-slate-950">{coordinator.coordinatorName}</dd></div>
+            <div><dt className="text-sm font-bold text-teal-800">เบอร์โทร</dt><dd className="mt-1"><a className="font-bold text-teal-800 underline underline-offset-4" href={`tel:${coordinator.phone}`}>{coordinator.phone}</a></dd></div>
+            <div><dt className="text-sm font-bold text-teal-800">ID LINE</dt><dd className="mt-1 font-bold text-slate-950">{coordinator.lineId}</dd></div>
+          </dl>
+        ) : (
+          <p className="mt-2 text-base leading-7 text-slate-700">ยังไม่มีข้อมูลผู้ประสานงานในพื้นที่</p>
+        )}
       </section>
 
       <Link

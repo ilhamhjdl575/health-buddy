@@ -10,6 +10,8 @@ This directory contains the database migration scripts and schema documentation 
   - `migrations/004_complete_profile_onboarding.sql` (Transactional authenticated USER/BUDDY onboarding RPC)
   - `migrations/005_buddy_signup_details.sql` (Step 18.6: Buddy types, work modes, and certificate bucket)
   - `migrations/006_complete_onboarding_persistence.sql` (Step 18.7: End-to-end onboarding persistence with emergency contacts, mutual exclusion mobility, work mode validation, and certificate storage policies)
+  - `migrations/017_local_coordinator.sql` (Local health center coordinator contact, readable by authenticated users and managed server-side)
+  - `migrations/018_unlisted_coordinator_management.sql` (Narrow read/write RPCs for the unlisted coordinator management page)
 
 ## System Constraints & Enums
 - **User Roles**: Strictly `USER` and `BUDDY` (No ADMIN, no PROFESSIONAL).
