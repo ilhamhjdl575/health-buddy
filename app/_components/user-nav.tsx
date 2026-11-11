@@ -84,7 +84,8 @@ export function UserNav({
 
   // Close mobile drawer when route changes
   useEffect(() => {
-    setMobileMenuOpen(false);
+    const timer = window.setTimeout(() => setMobileMenuOpen(false), 0);
+    return () => window.clearTimeout(timer);
   }, [pathname]);
 
   // Close mobile drawer on Escape key
@@ -338,6 +339,13 @@ export function UserNav({
             role="tablist"
             className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none scroll-smooth touch-pan-x"
           >
+            <Link
+              href="/user"
+              className="flex size-11 sm:size-13 md:size-14 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border-2 border-teal-200 bg-white p-1 shadow-xs transition hover:border-teal-400 hover:bg-teal-100/70 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-teal-800 active:scale-[0.98]"
+              aria-label="Health Buddy หน้าหลัก"
+            >
+              <HealthBuddyLogo className="size-8 sm:size-9 md:size-10 shrink-0 rounded-lg sm:rounded-xl" />
+            </Link>
             {userNavItems.map((item) => {
               const active = isItemActive(item);
               const Icon = item.icon;
